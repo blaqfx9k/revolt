@@ -33,7 +33,7 @@ except ImportError:
 # ═════════════════════════ EINSTELLUNGEN ═════════════════════════
 PORT = int(os.environ.get("PORT") or os.environ.get("BOOST_PORT") or 5050)
 # Adresse deines Lizenzservers. Zum Testen lokal, zum Verkaufen z. B. "https://deine-domain.de"
-SERVER_URL = os.environ.get("BOOST_SERVER", f"http://127.0.0.1:{PORT}")
+SERVER_URL = os.environ.get"http://5.253.246.114:5050"
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 
 BASE_DIR = os.path.dirname(sys.executable if getattr(sys, "frozen", False) else os.path.abspath(__file__))
