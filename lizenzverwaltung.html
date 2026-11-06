@@ -1058,10 +1058,10 @@ $("#copyAll").addEventListener("click", () => copyText(lastCreatedKeys.join("\n"
 
 $("#copyDiscord").addEventListener("click", () => {
   const durationText = lastCreatedDays === 0 ? "Lifetime (dauerhaft unbegrenzt)" : `${lastCreatedDays} Tage`;
-  let msg = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🎮 REVOLT OPTIMIZER – DEIN LIZENZKEY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  let msg = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nREVOLT OPTIMIZER – DEIN LIZENZKEY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
   if (lastCreatedNote) msg += `👤 Benutzer: ${lastCreatedNote}\n`;
   msg += `🔑 Key: ${lastCreatedKeys.join("\n🔑 Key: ")}\n⏳ Laufzeit: ${durationText}\n\n`;
-  msg += `Anleitung:\n1. Starte 'fivem_boost.exe' (oder python fivem_boost.py)\n2. Gib deinen Key ein und klicke auf 'Aktivieren'\n3. Wähle deine Optimierungen & starte mit maximalen FPS durch!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+  msg += `Anleitung:\n1. Starte 'revolt optimizer.exe'\n2. Gib deinen Key ein und klicke auf 'Aktivieren'\n3. Wähle deine Optimierungen & starte mit maximalen FPS durch!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
   copyText(msg, "Discord-Nachricht kopiert! Bereit zum Versenden.");
 });
 
