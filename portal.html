@@ -1,0 +1,2610 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>REVOLT OPTIMIZER · Kundenportal</title>
+<style>
+:root {
+  --bg: #000000;
+  --card: #0a0a0a;
+  --card-hover: #111111;
+  --row: #0e0e0e;
+  --row-hover: #161616;
+  --line: #222222;
+  --line-light: #333333;
+  --fg: #ffffff;
+  --muted: #8e8e8e;
+  --accent: #ffffff;
+  --ok: #f2f2f2;
+  --ok-bg: rgba(255, 255, 255, 0.08);
+  --warn: #c9c9c9;
+  --warn-bg: rgba(255, 255, 255, 0.055);
+  --err: #e5e5e5;
+  --err-bg: rgba(255, 255, 255, 0.07);
+  --bound: #c7c7c7;
+  --bound-bg: rgba(255, 255, 255, 0.06);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+canvas#snow {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+/* ───────── Typography & Header ───────── */
+h1 { font-size: 24px; letter-spacing: 0.2em; margin: 0; font-weight: 800; }
+.sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.top .brand { display: flex; align-items: center; gap: 14px; }
+.top .badge-admin {
+  background: #1a1a1a;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.top .actions-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 10px var(--ok);
+  margin-right: 6px;
+}
+.server-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 15, 15, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.server-pill b { color: var(--fg); margin-left: 4px; font-weight: 600; }
+
+/* ───────── Stats Grid ───────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat {
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.stat:hover { border-color: var(--line-light); transform: translateY(-2px); }
+.stat b { display: block; font-size: 28px; margin-bottom: 2px; font-weight: 800; letter-spacing: -0.02em; }
+.stat span { color: var(--muted); font-size: 12px; font-weight: 500; }
+.stat.green b { color: var(--ok); }
+.stat.amber b { color: var(--warn); }
+.stat.red b { color: var(--err); }
+.stat.blue b { color: var(--bound); }
+
+/* ───────── Cards & Sections ───────── */
+.card {
+  background: rgba(10, 10, 10, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+.card h2 {
+  font-size: 13px;
+  margin: 0 0 16px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--fg);
+  text-transform: uppercase;
+}
+.card h2 small { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: normal; text-transform: none; }
+
+/* ───────── Forms & Controls ───────── */
+input, select, textarea {
+  background: #000;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+label { display: block; color: var(--muted); font-size: 12px; margin: 0 0 6px; font-weight: 500; }
+
+button {
+  background: #ffffff;
+  color: #000000;
+  border: 0;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+button:hover { background: #e5e5e5; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+button.ghost {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid var(--line);
+}
+button.ghost:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+button.danger {
+  background: rgba(255, 255, 255, 0.055);
+  color: #eeeeee;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+button.danger:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+button.success {
+  background: rgba(255, 255, 255, 0.055);
+  color: #eeeeee;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+button.success:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+button.sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; font-weight: 600; }
+button.icon-btn { padding: 6px 9px; font-size: 13px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1; min-width: 180px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+/* ───────── Login Screen ───────── */
+.login { max-width: 440px; margin: 0 auto; padding-top: 9vh; }
+.login .card { display: grid; gap: 14px; padding: 28px; }
+.preset-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.preset-pill {
+  background: #111;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.preset-pill:hover { color: #fff; border-color: #fff; }
+.err {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #eeeeee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.hint { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+/* ───────── Table & Badges ───────── */
+.tablewrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  margin-top: 14px;
+  background: rgba(3, 3, 3, 0.32);
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+th {
+  background: #080808;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  background: var(--card);
+}
+tr:last-child td { border-bottom: 0; }
+tr:hover td { background: var(--row-hover); }
+
+code.key-code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  background: #000;
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+}
+code.key-code:hover { border-color: #fff; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tag.ok { color: var(--ok); border-color: rgba(255, 255, 255, 0.22); background: var(--ok-bg); }
+.tag.warn { color: var(--warn); border-color: rgba(255, 255, 255, 0.18); background: var(--warn-bg); }
+.tag.err { color: var(--err); border-color: rgba(255, 255, 255, 0.2); background: var(--err-bg); }
+.tag.bound { color: var(--bound); border-color: rgba(255, 255, 255, 0.18); background: var(--bound-bg); }
+
+.user-cell { display: flex; flex-direction: column; gap: 2px; }
+.user-name { font-weight: 600; color: #fff; }
+.user-note { color: var(--muted); font-size: 11px; }
+
+.actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+.user-admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.user-admin-name { display: flex; flex-direction: column; gap: 3px; }
+.user-admin-name b { color: #fff; }
+.user-admin-name span, .user-admin-meta { color: var(--muted); font-size: 11px; }
+.user-admin-state { display: inline-flex; align-items: center; gap: 6px; }
+.user-admin-actions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.custom-select { position: relative; display: inline-block; min-width: 145px; vertical-align: middle; }
+.custom-select.is-full { display: block; width: 100%; }
+.custom-select-native { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; opacity: 0 !important; pointer-events: none !important; }
+.custom-select-trigger { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 14px; border: 1px solid #3b3b3b; border-radius: 10px; background: linear-gradient(145deg,#171717,#080808); color: #f7f7f7; font: inherit; text-align: left; white-space: normal; box-shadow: inset 0 1px rgba(255,255,255,.035),0 8px 20px rgba(0,0,0,.22); transition: border-color .2s,background .2s,box-shadow .2s,transform .2s; }
+.custom-select-trigger::after { content: ""; flex: 0 0 8px; width: 8px; height: 8px; margin: -4px 2px 0 0; border-right: 1.5px solid #ddd; border-bottom: 1.5px solid #ddd; transform: rotate(45deg); transition: transform .2s; }
+.custom-select-trigger:hover { background: linear-gradient(145deg,#202020,#0b0b0b); border-color: #777; box-shadow: 0 8px 24px rgba(0,0,0,.35),0 0 16px rgba(255,255,255,.035); transform: translateY(-1px); }
+.custom-select-trigger[aria-expanded="true"] { border-color: #ddd; box-shadow: 0 0 0 3px rgba(255,255,255,.08),0 10px 28px rgba(0,0,0,.45); }
+.custom-select-trigger[aria-expanded="true"]::after { transform: rotate(225deg); margin-top: 4px; }
+.custom-select-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.custom-select-menu { position: fixed; z-index: 10000; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 1px solid #5b5b5b; border-radius: 12px; background: linear-gradient(155deg,#111,#030303 78%); box-shadow: 0 24px 60px rgba(0,0,0,.78),0 0 24px rgba(255,255,255,.045); scrollbar-color: #555 #101010; animation: selectMenuIn .16s cubic-bezier(.2,.8,.2,1) both; }
+.custom-select-option { position: relative; width: 100%; display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; overflow: hidden; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #ddd; font: inherit; text-align: left; white-space: normal; transition: color .14s,background .14s,border-color .14s,transform .14s; }
+.custom-select-option::before { content: ""; width: 5px; height: 5px; flex: 0 0 5px; border-radius: 50%; background: transparent; box-shadow: 0 0 0 transparent; }
+.custom-select-option[aria-selected="true"] { color: #fff; background: #202020; border-color: #383838; }
+.custom-select-option[aria-selected="true"]::before { background: #fff; box-shadow: 0 0 9px rgba(255,255,255,.8); }
+.custom-select-option:hover,.custom-select-option.is-active { color: #050505; background: #f2f2f2; border-color: #fff; transform: translateX(2px); }
+.custom-select-option:hover::before,.custom-select-option.is-active::before { background: #111; box-shadow: none; }
+.custom-select-option:disabled { opacity: .42; cursor: not-allowed; }
+.custom-select-option:disabled:hover { color: #ddd; background: transparent; border-color: transparent; transform: none; }
+.admin-credential { display: grid; gap: 14px; }
+.admin-credential-code { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border: 1px solid #444; border-radius: 12px; background: linear-gradient(145deg,#171717,#050505); }
+.admin-credential-code code { color: #fff; font-size: 17px; font-weight: 800; letter-spacing: .06em; overflow-wrap: anywhere; user-select: all; }
+.modal-backdrop.custom-confirm-backdrop { z-index: 20000; }
+.modal-box.custom-confirm-box { max-width: 470px; display: grid; gap: 16px; border-color: #555; background: radial-gradient(ellipse at 0 0,rgba(255,255,255,.07),transparent 55%),linear-gradient(145deg,#111,#050505); box-shadow: 0 32px 100px rgba(0,0,0,.82),0 0 30px rgba(255,255,255,.04); }
+.custom-confirm-heading { display: flex; align-items: center; gap: 14px; }
+.custom-confirm-mark { flex: 0 0 46px; width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid #555; border-radius: 14px; background: linear-gradient(145deg,#242424,#090909); color: #fff; font-size: 21px; font-weight: 800; box-shadow: inset 0 1px rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.35); }
+.custom-confirm-kicker { color: #8d8d8d; font-size: 10px; letter-spacing: .18em; font-weight: 800; }
+.custom-confirm-heading h3 { margin: 4px 0 0; color: #fff; font-size: 17px; letter-spacing: .02em; }
+.custom-confirm-message { margin: 0; color: #c7c7c7; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+.custom-confirm-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px; padding-top: 2px; }
+.custom-confirm-actions .confirm-action { background: linear-gradient(120deg,#fff,#ccc); color: #050505; border: 1px solid #fff; }
+.custom-confirm-actions .confirm-action:hover { background: #fff; box-shadow: 0 8px 22px rgba(255,255,255,.13); }
+@keyframes selectMenuIn { from { opacity: 0; transform: translateY(-5px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* ───────── New Keys Banner ───────── */
+.newkeys { border-color: #fff; background: rgba(14, 14, 14, 0.98); }
+.keyline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.keyline:last-of-type { border-bottom: 0; }
+.keyline code { font-size: 16px; flex: 1; font-weight: 700; color: #fff; letter-spacing: 0.06em; }
+.key-details { font-size: 12px; color: var(--muted); }
+
+/* ───────── Modals ───────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: #0d0d0d;
+  border: 1px solid var(--line-light);
+  border-radius: 18px;
+  max-width: 500px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: modalIn 0.15s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.modal-header h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.05em; }
+.modal-body { display: grid; gap: 14px; margin-bottom: 22px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ───────── Toast ───────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+  background: #ffffff;
+  color: #000000;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0;
+  transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  pointer-events: none;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.empty { color: var(--muted); text-align: center; padding: 36px 12px; font-size: 13px; }
+
+/* ───────── Responsive ───────── */
+@media(max-width: 768px) {
+  .wrap { padding: 20px 14px 60px; }
+  h1 { font-size: 20px; }
+  .actions { flex-direction: column; gap: 4px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+/* ═════════ Kundenportal ═════════ */
+.auth-shell{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:56px;max-width:1100px;margin:0 auto;padding:40px 24px}
+.auth-hero h1{font-size:38px;letter-spacing:.14em;line-height:1.15;margin:0 0 16px}
+.auth-hero p{color:var(--muted);font-size:15px;line-height:1.65;max-width:440px;margin:0 0 28px}
+.feat{display:grid;gap:16px}
+.feat div{display:flex;gap:14px;align-items:flex-start;color:var(--muted);font-size:13px;line-height:1.5}
+.feat b{color:#fff;font-size:14px}
+.feat i{font-style:normal;width:34px;height:34px;border:1px solid var(--line-light);border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.04)}
+.auth-card{background:rgba(10,10,10,.93);border:1px solid var(--line-light);border-radius:22px;padding:32px;box-shadow:0 40px 90px rgba(0,0,0,.65)}
+.auth-card h2{margin:0 0 4px;font-size:20px;letter-spacing:0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#000;border:1px solid var(--line);border-radius:12px;padding:4px;margin:18px 0 22px}
+.tabs button{background:transparent;color:var(--muted);padding:10px;border-radius:9px;font-weight:600}
+.tabs button:hover{background:transparent;color:#fff;transform:none}
+.tabs button.on{background:#fff;color:#000}
+.field{margin-bottom:15px}.field input{width:100%}
+.pwwrap{position:relative}.pwwrap input{padding-right:84px}
+.pwwrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:5px 10px;font-size:11px}
+.pwwrap .eye:hover{transform:translateY(-50%)}
+.meter{height:4px;background:var(--line);border-radius:4px;margin-top:9px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;transition:width .25s,background .25s}
+.meter-l{font-size:11px;color:var(--muted);margin-top:5px;min-height:14px}
+.chk{display:flex;gap:9px;align-items:center;color:var(--muted);font-size:13px;margin:2px 0 18px;cursor:pointer}
+.chk input{width:16px;height:16px;padding:0;accent-color:#fff}
+.btn-full{width:100%;padding:13px;font-size:14px}
+.auth-foot{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+.auth-foot a,.link{color:#fff;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.security-check{margin:18px 0;padding:14px;background:#080808;border:1px solid var(--line-light);border-radius:14px}
+.security-check label{display:block;margin-bottom:10px;font-size:13px;font-weight:650;color:#fff}
+.challenge-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:9px;align-items:center}
+.challenge-row input{text-align:center;font-size:18px;font-weight:750;font-variant-numeric:tabular-nums}
+.challenge-row button{height:42px;padding:0;font-size:18px}
+.security-hint{margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.honeypot{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.portal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+.userchip{display:flex;align-items:center;gap:10px;background:rgba(10,10,10,.9);border:1px solid var(--line);border-radius:999px;padding:4px 16px 4px 4px;font-size:13px;font-weight:600}
+.av{border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-weight:800;overflow:hidden;flex:none;width:34px;height:34px}
+.av img{width:100%;height:100%;object-fit:cover}
+.hero-dl{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(135deg,#171717,#080808 70%);border:1px solid var(--line-light);border-radius:22px;padding:26px 30px;margin-bottom:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.hero-dl .l{display:flex;gap:18px;align-items:center}
+.dl-icon{width:58px;height:58px;border-radius:16px;background:#fff;color:#000;display:grid;place-items:center;font-size:26px;font-weight:800}
+.hero-dl h2{margin:0 0 4px;font-size:20px;letter-spacing:0}
+.hero-dl p{margin:0;color:var(--muted);font-size:13px}
+.big{padding:15px 28px;font-size:15px;border-radius:12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.step{background:rgba(10,10,10,.9);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.step b{display:block;color:#fff;font-size:13.5px;margin-bottom:4px}
+.step em{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#000;font-size:11px;font-weight:800;margin-right:8px}
+.step code{background:#000;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#fff;font-size:12px}
+.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
+.avatar-row{display:flex;gap:20px;align-items:center;margin-bottom:22px}
+.av.big{width:88px;height:88px;font-size:32px;border:2px solid var(--line-light)}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}.kv span{color:var(--muted)}
+.danger-zone{border-color:rgba(255,255,255,.24)}
+@media(max-width:860px){.auth-shell{grid-template-columns:1fr;gap:28px;padding-top:28px}.auth-hero h1{font-size:28px}.feat{display:none}.steps,.grid2{grid-template-columns:1fr}.hero-dl{padding:22px}}
+
+/* ───────── Portal Tabs Navigation ───────── */
+.portal-nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.portal-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.portal-tab-btn:hover {
+  color: var(--fg);
+  background: var(--card);
+}
+.portal-tab-btn.active {
+  color: var(--fg);
+  border-bottom-color: #ffffff;
+  background: var(--card);
+}
+.portal-tab-btn.buy-tab {
+  color: #eeeeee;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.06);
+}
+.portal-tab-btn.buy-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+/* REVOLT interface update: animated ice glass, responsive actions and command palette */
+:root{--bg:#050505;--card:#0d0d0d;--card-hover:#151515;--row:#111;--row-hover:#191919;--line:#242424;--line-light:#393939;--fg:#f4f4f4;--muted:#a0a0a0;--accent:#fff;--ok:#f2f2f2;--ok-bg:rgba(255,255,255,.08);--warn:#c9c9c9;--warn-bg:rgba(255,255,255,.055);--err:#e5e5e5;--err-bg:rgba(255,255,255,.07);--bound:#c7c7c7;--bound-bg:rgba(255,255,255,.06)}
+body{background:radial-gradient(ellipse at 12% 0%,rgba(255,255,255,.09),transparent 34%),radial-gradient(ellipse at 88% 16%,rgba(180,180,180,.07),transparent 32%),radial-gradient(ellipse at 50% 100%,rgba(120,120,120,.06),transparent 42%),#050505;background-attachment:fixed}
+body:before{content:"";position:fixed;inset:-55%;z-index:0;pointer-events:none;opacity:.18;filter:blur(105px);background:conic-gradient(from 35deg at 50% 50%,transparent 0deg,rgba(255,255,255,.12) 75deg,transparent 145deg,rgba(190,190,190,.1) 225deg,transparent 310deg);animation:auroraDrift 32s linear infinite}
+.wrap{animation:portalRise .72s cubic-bezier(.2,.75,.25,1) both}
+.top{position:relative;padding:16px 18px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:linear-gradient(120deg,rgba(18,18,18,.88),rgba(8,8,8,.76));backdrop-filter:blur(16px);box-shadow:0 16px 44px rgba(0,0,0,.22)}
+.top .badge-admin{color:#eee;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
+.status-dot{animation:statusPulse 2.2s ease-in-out infinite}
+.err{color:#eee;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.055)}
+.tag.ok,.tag.warn,.tag.err,.tag.bound{color:#eee;border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.055);box-shadow:none}
+button.danger,button.success{color:#eee;background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.2)}
+button.danger:hover,button.success:hover{color:#000;background:#fff;border-color:#fff}
+.danger-zone{border-color:rgba(255,255,255,.24)}
+.portal-tab-btn.buy-tab{color:#eee;border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.06)}
+.portal-tab-btn.buy-tab:hover{color:#fff;border-color:#fff;background:rgba(255,255,255,.12)}
+.stat{background:linear-gradient(145deg,rgba(20,20,20,.94),rgba(7,7,7,.95));backdrop-filter:blur(12px);animation:cardFloatIn .7s both}
+.stats .stat:nth-child(2){animation-delay:50ms}.stats .stat:nth-child(3){animation-delay:100ms}.stats .stat:nth-child(4){animation-delay:150ms}.stats .stat:nth-child(5){animation-delay:200ms}.stats .stat:nth-child(6){animation-delay:250ms}
+.card{background:linear-gradient(145deg,rgba(18,18,18,.95),rgba(7,7,7,.94));border-color:rgba(255,255,255,.14);backdrop-filter:blur(15px);box-shadow:0 18px 46px rgba(0,0,0,.3);transition:transform .25s,border-color .25s,box-shadow .25s}
+.wrap>.card:hover{border-color:rgba(255,255,255,.28);box-shadow:0 20px 48px rgba(0,0,0,.36),0 0 30px rgba(255,255,255,.035)}
+button{transition:transform .18s,box-shadow .25s,filter .25s,border-color .25s}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}
+.user-bulkbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(255,255,255,.025)}
+.user-bulkbar .selection-count{color:var(--muted);font-size:12px;margin-right:auto;padding:0 5px}
+.user-select-cell{display:flex;align-items:center;gap:10px}
+.user-select-cell input,.user-bulkbar input[type=checkbox]{width:17px;height:17px;min-width:17px;margin:0;padding:0;border-radius:4px;accent-color:#fff;cursor:pointer}
+.user-select-cell label{cursor:pointer}
+.bulk-danger{color:#fff!important;border-color:rgba(255,255,255,.32)!important}
+.modal-backdrop{background:rgba(2,2,2,.78);backdrop-filter:blur(12px);animation:veilIn .2s ease both}
+.modal-box{animation:modalPop .28s cubic-bezier(.2,.8,.2,1) both;border-color:rgba(255,255,255,.2);box-shadow:0 30px 100px rgba(0,0,0,.62),0 0 40px rgba(255,255,255,.045)}
+.command-backdrop{z-index:20;align-items:flex-start;padding-top:min(17vh,150px)}
+.command-box{width:min(620px,calc(100vw - 28px));padding:12px;border:1px solid rgba(255,255,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(22,22,22,.98),rgba(5,5,5,.98));box-shadow:0 32px 100px rgba(0,0,0,.72),0 0 55px rgba(255,255,255,.08);animation:modalPop .24s cubic-bezier(.2,.8,.2,1) both}
+.command-box input{width:100%;font-size:16px;padding:15px 16px;border:0;background:rgba(255,255,255,.035)}
+.command-list{display:grid;gap:5px;margin-top:10px;max-height:48vh;overflow:auto}
+.command-item{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;padding:12px 13px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--fg);font-weight:600}
+.command-item:before{display:none}.command-item:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);box-shadow:none;transform:translateX(3px)}
+.command-item small{color:var(--muted);font-size:11px;font-weight:500}
+.command-hint{padding:10px 6px 2px;color:var(--muted);font-size:11px}
+#usersTb tr{animation-delay:calc(var(--row-index,0)*24ms)}
+html{scroll-behavior:smooth}
+@keyframes portalRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardFloatIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes statusPulse{50%{box-shadow:0 0 18px rgba(255,255,255,.65)}}
+@keyframes veilIn{from{opacity:0}to{opacity:1}}
+@keyframes modalPop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes auroraDrift{to{transform:rotate(360deg)}}
+@media(max-width:700px){.top{padding:13px;border-radius:15px}.user-bulkbar .selection-count{width:100%;margin:0 0 4px}.user-bulkbar button{flex:1}.command-backdrop{padding-top:8vh}}
+@media(prefers-reduced-motion:reduce){.status-dot{animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+
+<!-- ═════════════════════════ KUNDENPORTAL: ANMELDEN / REGISTRIEREN ═════════════════════════ -->
+<main id="authView" class="auth-shell" hidden>
+  <section class="auth-hero">
+    <h1>REVOLT<br><span style="color:var(--muted)">OPTIMIZER</span></h1>
+    <p>Dein Kundenportal: Konto erstellen, den Client herunterladen und Profil sowie Lizenz an einem Ort verwalten.</p>
+    <div class="feat">
+      <div><i>⚡</i><span><b>Mehr FPS in FiveM</b><br>Cache, Netzwerk, CPU &amp; GPU – mit einem Klick optimiert.</span></div>
+      <div><i>🔐</i><span><b>Sichere Lizenzierung</b><br>Dein Key ist an dein Konto und deinen PC gebunden.</span></div>
+      <div><i>⬇</i><span><b>Immer aktuell</b><br>Lade die neueste Version direkt hier herunter.</span></div>
+    </div>
+  </section>
+
+  <section class="auth-card">
+    <h2 id="authTitle">Willkommen zurück</h2>
+    <div class="sub" id="authSub">Melde dich an, um fortzufahren.</div>
+    <div class="tabs" id="authTabs">
+      <button type="button" id="tabLogin" class="on">Anmelden</button>
+      <button type="button" id="tabReg">Registrieren</button>
+    </div>
+    <div id="authErr" class="err" hidden style="margin-bottom:16px"></div>
+
+    <form id="userLoginForm" novalidate>
+      <div class="field"><label for="uEmail">E-Mail</label><input id="uEmail" type="email" autocomplete="email" placeholder="du@beispiel.de" required></div>
+      <div class="field"><label for="uPw">Passwort</label>
+        <div class="pwwrap"><input id="uPw" type="password" autocomplete="current-password" placeholder="Dein Passwort" required><button type="button" class="ghost sm eye" data-for="uPw">Zeigen</button></div></div>
+      <label class="chk"><input type="checkbox" id="uRemember" checked> Angemeldet bleiben</label>
+      <button class="btn-full" id="ulBtn">Anmelden</button>
+    </form>
+
+    <form id="regForm" hidden novalidate>
+      <div class="field"><label for="rName">Name</label><input id="rName" autocomplete="name" placeholder="Dein Name" maxlength="40" required></div>
+      <div class="field"><label for="rEmail">E-Mail</label><input id="rEmail" type="email" autocomplete="email" placeholder="du@beispiel.de" required></div>
+      <div class="field"><label for="rPw">Passwort</label>
+        <div class="pwwrap"><input id="rPw" type="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" required><button type="button" class="ghost sm eye" data-for="rPw">Zeigen</button></div>
+        <div class="meter"><i id="meterBar"></i></div><div class="meter-l" id="meterLbl"></div></div>
+      <div class="field"><label for="rPw2">Passwort wiederholen</label><input id="rPw2" type="password" autocomplete="new-password" placeholder="Passwort bestätigen" required></div>
+      <div class="security-check">
+        <label id="regChallengePrompt" for="regChallengeAnswer" aria-live="polite">Sicherheitsfrage wird geladen …</label>
+        <div class="challenge-row"><input id="regChallengeAnswer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" placeholder="Antwort" required><button type="button" class="ghost sm" id="refreshRegChallenge" aria-label="Neue Sicherheitsfrage laden" title="Neue Frage">↻</button></div>
+        <p class="security-hint">Beantworte die kurze Rechenfrage, um die Registrierung abzuschließen.</p>
+      </div>
+      <div class="honeypot" aria-hidden="true"><label for="regWebsite">Website</label><input id="regWebsite" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+      <button class="btn-full" id="rgBtn">Konto erstellen</button>
+    </form>
+
+    <div class="auth-foot" id="authFoot">Du bist Admin? <a id="toAdmin">Zum Admin-Zugang</a></div>
+  </section>
+</main>
+
+<!-- ═════════════════════════ KUNDENPORTAL: MEIN KONTO ═════════════════════════ -->
+<main id="portalView" class="wrap" hidden>
+  <header class="portal-top">
+    <div><h1>REVOLT OPTIMIZER</h1><div class="sub">Kundenportal</div></div>
+    <div class="row" style="gap:10px">
+      <div class="userchip"><div class="av" id="avChip"></div><span id="chipName"></span></div>
+      <button class="ghost sm" id="uLogout">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- ───────── Navigation Tabs ───────── -->
+  <nav class="portal-nav-tabs">
+    <button type="button" class="portal-tab-btn active" data-tab="home" onclick="switchPortalTab('home')">🏠 Home</button>
+    <button type="button" class="portal-tab-btn" data-tab="download" onclick="switchPortalTab('download')">⬇️ Download</button>
+    <button type="button" class="portal-tab-btn" data-tab="profile" onclick="switchPortalTab('profile')">👤 Profil</button>
+    <a href="https://discord.gg/revolt-optimizer" target="_blank" rel="noopener noreferrer" class="portal-tab-btn buy-tab">🛒 Kaufen <span style="font-size:11px; opacity:0.7">↗</span></a>
+  </nav>
+
+  <!-- ───────── TAB 1: HOME ───────── -->
+  <div id="tab-home" class="portal-tab-pane">
+    <div class="card" style="margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="av big" id="homeAvBig"></div>
+        <div>
+          <h2 style="margin:0; font-size:20px; letter-spacing:0.02em;">Willkommen zurück, <span id="homeWelcomeName">User</span>! 👋</h2>
+          <div class="sub" style="margin-top:4px;">Dein persönlicher REVOLT FiveM Optimizer Bereich</div>
+        </div>
+      </div>
+      <div class="row" style="gap:10px;">
+        <button class="sm" onclick="switchPortalTab('download')">⬇️ Zum Download</button>
+        <a href="https://discord.gg/revolt-optimizer" target="_blank" rel="noopener" class="ghost sm" style="text-decoration:none; display:inline-flex; align-items:center;">Discord Server</a>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <!-- Benutzer Information -->
+      <section class="card">
+        <h2>BENUTZER-INFORMATIONEN</h2>
+        <div class="kv"><span>Name</span><b id="homeName">–</b></div>
+        <div class="kv"><span>E-Mail</span><b id="homeEmail">–</b></div>
+        <div class="kv"><span>Discord</span><b id="homeDiscord">–</b></div>
+        <div class="kv"><span>Mitglied seit</span><b id="homeSince">–</b></div>
+        <div class="kv"><span>Letzter Login</span><b id="homeLast">–</b></div>
+        <div style="margin-top:20px;">
+          <button class="ghost sm" onclick="switchPortalTab('profile')">✏️ Profil bearbeiten</button>
+        </div>
+      </section>
+
+      <!-- Lizenz Übersicht -->
+      <section class="card">
+        <h2>LIZENZ-STATUS</h2>
+        <div id="licInfo"></div>
+        <form id="licForm" style="margin-top:14px" novalidate>
+          <label for="licKey">Lizenzkey verknüpfen</label>
+          <div class="row" style="gap:8px"><input id="licKey" class="grow" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" style="text-transform:uppercase"><button>Verknüpfen</button></div>
+        </form>
+        <button class="ghost sm" id="licDetach" style="margin-top:12px" hidden>Key vom Konto lösen</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- ───────── TAB 2: DOWNLOAD ───────── -->
+  <div id="tab-download" class="portal-tab-pane" hidden>
+    <section class="hero-dl">
+      <div class="l"><div class="dl-icon">⬇</div>
+        <div><h2>Client herunterladen</h2><p id="dlMeta">Lade Informationen …</p></div></div>
+      <button class="big" id="dlBtn" disabled>⬇&nbsp; revolt optimizer herunterladen</button>
+    </section>
+
+    <section class="steps">
+      <div class="step"><b><em>1</em>Python installieren</b>Version 3.10 oder neuer von python.org – setze den Haken bei „Add Python to PATH“.</div>
+      <div class="step"><b><em>2</em>Datei starten</b>Doppelklick auf <code>revolt.exe</code> oder <code>python revolt optimizer.exe</code>. Fehlende Pakete werden automatisch installiert.</div>
+      <div class="step"><b><em>3</em>Key aktivieren</b>Gib deinen Lizenzkey im Programm ein und optimiere dein FiveM mit maximalen FPS.</div>
+    </section>
+  </div>
+
+  <!-- ───────── TAB 3: PROFIL ───────── -->
+  <div id="tab-profile" class="portal-tab-pane" hidden>
+    <div class="grid2">
+      <section class="card">
+        <h2>PROFIL VERWALTEN</h2>
+        <div class="avatar-row">
+          <div class="av big" id="avBig"></div>
+          <div>
+            <div class="row" style="gap:8px">
+              <button type="button" class="sm" onclick="$('#avFile').click()">Bild hochladen</button>
+              <button type="button" class="ghost sm" id="avRemove">Entfernen</button>
+            </div>
+            <div class="hint" style="margin-top:8px">JPG, PNG oder WebP – wird automatisch auf 256 × 256 zugeschnitten.</div>
+            <input type="file" id="avFile" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
+        </div>
+        <form id="profileForm" novalidate>
+          <div class="field"><label for="pName">Name</label><input id="pName" maxlength="40" required></div>
+          <div class="field"><label for="pEmail">E-Mail</label><input id="pEmail" type="email" required></div>
+          <div class="field"><label for="pDiscord">Discord (optional)</label><input id="pDiscord" maxlength="40" placeholder="benutzername"></div>
+          <button id="pSave">Änderungen speichern</button>
+        </form>
+
+        <div class="kv" style="margin-top:20px"><span>Mitglied seit</span><b id="pSince">–</b></div>
+
+        <div class="kv"><span>Letzter Login</span><b id="pLast">–</b></div>
+
+      </section>
+
+      <div>
+        <section class="card">
+          <h2>SICHERHEIT (PASSWORT ÄNDERN)</h2>
+          <form id="pwForm" novalidate>
+            <div class="field"><label for="curPw">Aktuelles Passwort</label><input id="curPw" type="password" autocomplete="current-password"></div>
+            <div class="field"><label for="newPw">Neues Passwort</label><input id="newPw" type="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen"></div>
+            <div class="field"><label for="newPw2">Neues Passwort wiederholen</label><input id="newPw2" type="password" autocomplete="new-password"></div>
+            <button class="ghost">Passwort ändern</button>
+          </form>
+        </section>
+
+        <section class="card danger-zone">
+          <h2 style="color:var(--err)">KONTO LÖSCHEN</h2>
+          <div class="hint" style="margin-bottom:12px">Dein Konto wird dauerhaft gelöscht. Dein Lizenzkey bleibt bestehen, wird aber vom Konto gelöst.</div>
+          <form id="delForm" class="row" style="gap:8px" novalidate>
+            <input id="delPw" type="password" class="grow" placeholder="Passwort zur Bestätigung" autocomplete="current-password">
+            <button class="danger">Löschen</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═════════════════════════ ADMIN-LOGIN ═════════════════════════ -->
+<main id="loginView" class="wrap login" hidden>
+  <div class="brand" style="margin-bottom: 6px;">
+    <h1>REVOLT OPTIMIZER</h1>
+    <div class="sub">Lizenz- & Benutzerverwaltung</div>
+  </div>
+
+  <form id="loginForm" class="card" autocomplete="off">
+    <div id="loginErr" class="err" hidden></div>
+
+    <div>
+      <label for="url">Lizenzserver-Adresse</label>
+      <input id="url" style="width:100%" placeholder="http://localhost:5050" required>
+      <div class="preset-buttons">
+        <span class="preset-pill" onclick="setServerPreset('http://localhost:5050')">localhost:5050</span>
+        <span class="preset-pill" onclick="setServerPreset('http://127.0.0.1:5050')">127.0.0.1:5050</span>
+      </div>
+    </div>
+
+    <div>
+      <label for="user">Admin-Benutzer</label>
+      <input id="user" style="width:100%" value="admin" required>
+    </div>
+
+    <div>
+      <label for="pw">Admin-Passwort</label>
+      <input id="pw" type="password" style="width:100%" placeholder="Dein Server-Passwort" required autofocus>
+    </div>
+
+    <button id="loginBtn" style="margin-top: 6px;">🔑 Anmelden</button>
+    <div class="hint" style="text-align:center"><a class="link" id="backPortal">← Zurück zum Kundenportal</a></div>
+
+    <div class="hint">
+      <b>Tipp:</b> Starte deinen Lizenzserver vorher im Terminal mit:<br>
+      <code>python fivem_boost.py server</code>
+    </div>
+  </form>
+</main>
+
+<!-- ═════════════════════════ DASHBOARD ═════════════════════════ -->
+<main id="dashView" class="wrap" hidden>
+  <header class="top">
+    <div class="brand">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1>REVOLT OPTIMIZER</h1>
+          <span class="badge-admin">Admin</span>
+        </div>
+        <div class="sub">Benutzer- & Lizenzverwaltung</div>
+      </div>
+    </div>
+
+    <div class="actions-header">
+      <div class="server-pill">
+        <span class="status-dot"></span>
+        <span id="hostLabel">localhost:5050</span>
+      </div>
+      <button class="ghost sm" id="refreshBtn" title="Aktualisieren">⟳ Aktualisieren</button>
+      <button class="ghost sm" id="exportBtn" title="Lizenzen als CSV exportieren">📥 Export (CSV)</button>
+      <button class="ghost sm" id="logoutBtn" title="Abmelden">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- ───── Stats ───── -->
+  <section class="stats">
+    <div class="stat"><b id="sTotal">0</b><span>Keys gesamt</span></div>
+    <div class="stat green"><b id="sActive">0</b><span>Aktive Benutzer</span></div>
+    <div class="stat blue"><b id="sBound">0</b><span>PCs verbunden</span></div>
+    <div class="stat amber"><b id="sExpired">0</b><span>Abgelaufen</span></div>
+    <div class="stat red"><b id="sRevoked">0</b><span>Gesperrt</span></div>
+    <div class="stat"><b id="sToday">0</b><span>Heute online</span></div>
+  </section>
+
+  <!-- ───── Create Keys ───── -->
+  <section class="card">
+    <h2>
+      <span>➕ Lizenzen & Benutzer erstellen</span>
+      <small>Generiert 16-stellige Keys für REVOLT OPTIMIZER</small>
+    </h2>
+    <form id="createForm" class="form-grid">
+      <div class="grow" style="grid-column: span 2;">
+        <label for="note">Benutzername / Kunde / Notiz</label>
+        <input id="note" style="width: 100%" placeholder="z. B. Discord: Max#0001, Kunde Peter, Shop-Kauf..." maxlength="100">
+      </div>
+
+      <div>
+        <label for="days">Gültigkeit / Laufzeit</label>
+        <select id="days" style="width: 100%">
+          <option value="1">1 Tag (Test-Lizenz)</option>
+          <option value="3">3 Tage</option>
+          <option value="7">7 Tage (1 Woche)</option>
+          <option value="14">14 Tage (2 Wochen)</option>
+          <option value="30" selected>30 Tage (1 Monat)</option>
+          <option value="60">60 Tage (2 Monate)</option>
+          <option value="90">90 Tage (3 Monate)</option>
+          <option value="180">180 Tage (6 Monate)</option>
+          <option value="365">365 Tage (1 Jahr)</option>
+          <option value="0">Lifetime (Dauerhaft)</option>
+          <option value="custom">Benutzerdefiniert...</option>
+        </select>
+      </div>
+
+      <div id="customDaysBox" hidden>
+        <label for="customDays">Tage</label>
+        <input id="customDays" type="number" min="1" max="3650" value="45" style="width: 100%">
+      </div>
+
+      <div style="max-width: 110px;">
+        <label for="count">Anzahl</label>
+        <input id="count" type="number" min="1" max="50" value="1" style="width: 100%">
+      </div>
+
+      <div>
+        <label for="customKey">Wunsch-Key (optional)</label>
+        <input id="customKey" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" style="width: 100%; text-transform: uppercase;">
+      </div>
+
+      <div>
+        <button id="createBtn" style="width: 100%">🚀 Lizenz erstellen</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ───── Newly Created Keys Box ───── -->
+  <section id="newBox" class="card newkeys" hidden>
+    <h2>
+      <span id="newTitle">✔ NEUE KEYS ERSTELLT</span>
+      <button class="ghost sm" id="newClose">✕ Schließen</button>
+    </h2>
+    <div id="newList"></div>
+    <div class="row" style="margin-top: 16px;">
+      <button id="copyAll">📋 Alle Keys kopieren</button>
+      <button class="ghost" id="copyDiscord">💬 Discord / Kunden-Nachricht kopieren</button>
+      <button class="ghost" id="downloadTxt">💾 Als .txt herunterladen</button>
+    </div>
+  </section>
+
+  <!-- ───── All Licenses / Users Table ───── -->
+  <section class="card">
+    <h2>
+      <span>👥 Alle Benutzer & Lizenzen (<span id="countFiltered">0</span>)</span>
+      <small>Klicke auf einen Key zum Kopieren</small>
+    </h2>
+
+    <div class="row" style="margin-bottom: 14px;">
+      <input id="q" class="grow" placeholder="🔍 Suchen nach Key, Benutzer / Notiz, HWID...">
+      
+      <select id="st">
+        <option value="">Alle Status</option>
+        <option value="aktiv">Nur Aktiv</option>
+        <option value="abgelaufen">Nur Abgelaufen</option>
+        <option value="gesperrt">Nur Gesperrt</option>
+      </select>
+
+      <select id="filterBound">
+        <option value="">Alle PCs</option>
+        <option value="gebunden">Gebunden (mit PC)</option>
+        <option value="frei">Frei (ohne PC)</option>
+      </select>
+
+      <select id="sortBy">
+        <option value="newest">Neueste zuerst</option>
+        <option value="oldest">Älteste zuerst</option>
+        <option value="seen">Zuletzt aktiv</option>
+        <option value="exp">Läuft bald ab</option>
+      </select>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Benutzer / Notiz</th>
+            <th>Status</th>
+            <th>Laufzeit / Ablauf</th>
+            <th>PC-Bindung</th>
+            <th>Zuletzt aktiv</th>
+            <th style="text-align: right;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+
+    <div id="empty" class="empty" hidden>Keine Lizenzen gefunden.</div>
+  </section>
+
+  <!-- ───── Registered Accounts ───── -->
+  <section class="card" id="registeredUsersSection">
+    <h2>
+      <span>🧑‍💻 Registrierte Konten (<span id="registeredUsersCount">0</span>)</span>
+      <small>Konten bearbeiten, sperren oder löschen</small>
+    </h2>
+    <div class="user-admin-toolbar">
+      <input id="usersQ" class="grow" placeholder="🔍 Suchen nach Name, E-Mail oder Discord …">
+      <select id="usersStatus">
+        <option value="">Alle Konten</option>
+        <option value="active">Nur aktive</option>
+        <option value="suspended">Nur gesperrte</option>
+      </select>
+    </div>
+    <div class="user-bulkbar" aria-label="Mehrfachaktionen für Benutzerkonten">
+      <label class="user-select-cell"><input id="usersSelectAll" type="checkbox" aria-label="Alle angezeigten Konten auswählen"><span>Alle angezeigten</span></label>
+      <span id="usersSelectionCount" class="selection-count">0 ausgewählt</span>
+      <button type="button" class="ghost sm" id="usersActivate" disabled>✓ Freischalten</button>
+      <button type="button" class="ghost sm" id="usersSuspend" disabled>⛔ Sperren</button>
+      <button type="button" class="ghost sm bulk-danger" id="usersDelete" disabled>🗑 Löschen</button>
+      <button type="button" class="ghost sm" id="usersExport">📥 Konten-CSV</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Benutzerkonto</th><th>Lizenz</th><th>Registriert</th><th>Letzter Login</th><th>Status</th>
+          <th style="text-align:right">Aktionen</th>
+        </tr></thead>
+        <tbody id="usersTb"></tbody>
+      </table>
+    </div>
+    <div id="usersEmpty" class="empty" hidden>Es wurden noch keine Konten registriert.</div>
+  </section>
+
+  <section class="card" id="adminsSection">
+    <h2>
+      <span>🛡 Admin-Konten (<span id="adminsCount">0</span>)</span>
+      <small>Adminzugänge hinzufügen, bearbeiten, sperren oder löschen</small>
+    </h2>
+    <div class="user-admin-toolbar">
+      <span class="hint grow">Jeder Admin erhält einen eigenen Benutzernamen und ein eigenes Passwort.</span>
+      <button type="button" id="adminCreateBtn">＋ Admin hinzufügen</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Admin</th><th>Erstellt</th><th>Status</th><th style="text-align:right">Aktionen</th></tr></thead>
+        <tbody id="adminsTb"></tbody>
+      </table>
+    </div>
+    <div id="adminsEmpty" class="empty" hidden>Keine Admin-Konten vorhanden.</div>
+  </section>
+</main>
+
+<!-- ═════════════════════════ EDIT MODAL ═════════════════════════ -->
+<div id="editModal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ Benutzer & Lizenz bearbeiten</h3>
+      <button class="ghost sm icon-btn" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="editForm">
+      <div class="modal-body">
+        <div>
+          <label>Lizenzkey</label>
+          <div class="row">
+            <code id="editKey" class="key-code" style="flex: 1; padding: 10px;"></code>
+            <button type="button" class="ghost sm" id="editCopyKey">Kopieren</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="editNote">Benutzername / Notiz</label>
+          <input id="editNote" style="width: 100%" placeholder="Benutzername oder Kundeninfo">
+        </div>
+
+        <div>
+          <label for="editStatus">Status</label>
+          <select id="editStatus" style="width: 100%">
+            <option value="active">Aktiv (Freigegeben)</option>
+            <option value="revoked">Gesperrt / Gebannt</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="editExtend">Laufzeit anpassen</label>
+          <select id="editExtend" style="width: 100%">
+            <option value="keep" selected>Unverändert lassen</option>
+            <option value="7">+ 7 Tage verlängern</option>
+            <option value="30">+ 30 Tage verlängern</option>
+            <option value="90">+ 90 Tage verlängern</option>
+            <option value="365">+ 1 Jahr verlängern</option>
+            <option value="lifetime">Auf Lifetime (unbegrenzt) setzen</option>
+          </select>
+        </div>
+
+        <div>
+          <label>PC / Hardware-Bindung (HWID)</label>
+          <div id="editHwidText" style="font-size: 12px; color: var(--muted); margin-bottom: 8px;"></div>
+          <button type="button" class="ghost sm" id="editResetHwidBtn">💻 PC-Bindung aufheben (HWID Reset)</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="ghost" onclick="closeEditModal()">Abbrechen</button>
+        <button type="submit">💾 Änderungen speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═════════════════════════ USER EDIT MODAL ═════════════════════════ -->
+<div id="userEditModal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>👤 Benutzerkonto bearbeiten</h3>
+      <button type="button" class="ghost sm icon-btn" id="userEditClose">✕</button>
+    </div>
+    <form id="userEditForm">
+      <div class="modal-body">
+        <div><label for="userEditName">Name</label><input id="userEditName" maxlength="40" required style="width:100%"></div>
+        <div><label for="userEditEmail">E-Mail</label><input id="userEditEmail" type="email" maxlength="254" required style="width:100%"></div>
+        <div class="hint">Passwörter werden aus Sicherheitsgründen nicht im Admin-Panel angezeigt oder geändert.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="ghost" id="userEditCancel">Abbrechen</button>
+        <button type="submit" id="userEditSave">💾 Änderungen speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adminEditModal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="adminEditTitle">🛡 Admin hinzufügen</h3>
+      <button type="button" class="ghost sm icon-btn" id="adminEditClose">✕</button>
+    </div>
+    <form id="adminEditForm">
+      <div class="modal-body">
+        <div><label for="adminEditUsername">Admin-Benutzername</label><input id="adminEditUsername" minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]{3,32}" autocomplete="username" required style="width:100%" placeholder="z. B. max_admin"></div>
+        <div id="adminEditPasswordField"><label for="adminEditPassword">Neues Passwort <span id="adminPasswordOptional"></span></label><input id="adminEditPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" style="width:100%" placeholder="Leer lassen, um es beizubehalten"></div>
+        <div class="hint" id="adminEditHint">Der Admin kann sich anschließend mit diesen Zugangsdaten anmelden.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="ghost" id="adminEditCancel">Abbrechen</button>
+        <button type="submit" id="adminEditSave">Admin speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adminCredentialModal" class="modal-backdrop" hidden>
+  <div class="modal-box admin-credential">
+    <div class="modal-header">
+      <h3>✅ Admin-Konto erstellt</h3>
+      <button type="button" class="ghost sm icon-btn" id="adminCredentialClose">✕</button>
+    </div>
+    <div class="hint">Das zufällige Passwort wird nur jetzt angezeigt. Kopiere es und gib es dem neuen Admin.</div>
+    <div class="admin-credential-code"><code id="adminCredentialPassword"></code><button type="button" class="ghost sm" id="adminCredentialCopy">Kopieren</button></div>
+    <div class="hint" id="adminCredentialUser"></div>
+    <div class="modal-footer"><button type="button" id="adminCredentialDone">Fertig</button></div>
+  </div>
+</div>
+
+<div id="customConfirm" class="modal-backdrop custom-confirm-backdrop" hidden>
+  <div class="modal-box custom-confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="customConfirmTitle" aria-describedby="customConfirmMessage">
+    <div class="custom-confirm-heading">
+      <div class="custom-confirm-mark" aria-hidden="true">!</div>
+      <div><div class="custom-confirm-kicker">SICHERHEITSABFRAGE</div><h3 id="customConfirmTitle">Aktion bestätigen</h3></div>
+    </div>
+    <p id="customConfirmMessage" class="custom-confirm-message"></p>
+    <div class="custom-confirm-actions">
+      <button type="button" class="ghost" id="customConfirmCancel">Abbrechen</button>
+      <button type="button" class="confirm-action" id="customConfirmAccept">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<div id="commandPalette" class="modal-backdrop command-backdrop" hidden>
+  <div class="command-box" role="dialog" aria-modal="true" aria-label="Schnellaktionen">
+    <input id="commandInput" type="search" placeholder="Aktion suchen …" autocomplete="off" aria-label="Aktionen durchsuchen">
+    <div class="command-list" id="commandList">
+      <button type="button" class="command-item" data-command="refresh">⟳ Daten aktualisieren <small>R</small></button>
+      <button type="button" class="command-item" data-command="license-search">⌕ Lizenz suchen <small>L</small></button>
+      <button type="button" class="command-item" data-command="user-search">♙ Benutzer suchen <small>/</small></button>
+      <button type="button" class="command-item" data-command="create-license">＋ Lizenz erstellen <small>Springen</small></button>
+      <button type="button" class="command-item" data-command="export-users">⇩ Benutzer als CSV exportieren <small>Export</small></button>
+      <button type="button" class="command-item" data-command="logout">↪ Abmelden <small>Sitzung beenden</small></button>
+    </div>
+    <div class="command-hint">Tastenkürzel: <b>Strg + K</b> öffnen · <b>Esc</b> schließen</div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ═════════════════════════ JAVASCRIPT ═════════════════════════ -->
+<script>
+"use strict";
+
+const $ = s => document.querySelector(s);
+const store = area => ({
+  get(k) { try { return window[area].getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { window[area].setItem(k, v); } catch (e) {} },
+  del(k) { try { window[area].removeItem(k); } catch (e) {} }
+});
+const local = store("localStorage"), session = store("sessionStorage");
+
+let base = "", token = "", licenses = [], users = [], admins = [], currentAdminUsername = "", isSuperAdmin = false, currentEditLicense = null, currentEditUser = null, currentEditAdmin = null;
+let pendingConfirmResolver = null, customConfirmReturnFocus = null;
+const selectedUsers = new Set();
+let lastCreatedKeys = [], lastCreatedNote = "", lastCreatedDays = 30;
+
+function el(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c === null || c === undefined) continue;
+    n.append(typeof c === "object" ? c : String(c));
+  }
+  return n;
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast on";
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => t.className = "toast", 2200);
+}
+
+function finishCustomConfirm(accepted) {
+  if (!pendingConfirmResolver) return;
+  const resolve = pendingConfirmResolver;
+  pendingConfirmResolver = null;
+  $("#customConfirm").hidden = true;
+  const returnFocus = customConfirmReturnFocus;
+  customConfirmReturnFocus = null;
+  if (returnFocus?.isConnected) returnFocus.focus();
+  resolve(accepted);
+}
+
+function showCustomConfirm(message, { title = "Aktion bestätigen", confirmText = "Bestätigen" } = {}) {
+  if (pendingConfirmResolver) finishCustomConfirm(false);
+  customConfirmReturnFocus = document.activeElement;
+  $("#customConfirmTitle").textContent = title;
+  $("#customConfirmMessage").textContent = message;
+  $("#customConfirmAccept").textContent = confirmText;
+  $("#customConfirm").hidden = false;
+  return new Promise(resolve => {
+    pendingConfirmResolver = resolve;
+    requestAnimationFrame(() => $("#customConfirmCancel").focus());
+  });
+}
+
+$("#customConfirmCancel").addEventListener("click", () => finishCustomConfirm(false));
+$("#customConfirmAccept").addEventListener("click", () => finishCustomConfirm(true));
+$("#customConfirm").addEventListener("click", event => {
+  if (event.target === $("#customConfirm")) finishCustomConfirm(false);
+});
+document.addEventListener("keydown", event => {
+  if ($("#customConfirm").hidden) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    finishCustomConfirm(false);
+  } else if (event.key === "Tab") {
+    const cancel = $("#customConfirmCancel"), accept = $("#customConfirmAccept");
+    if (event.shiftKey && document.activeElement === cancel) { event.preventDefault(); accept.focus(); }
+    else if (!event.shiftKey && document.activeElement === accept) { event.preventDefault(); cancel.focus(); }
+  }
+});
+
+function fmt(ts) {
+  if (!ts) return "–";
+  return new Date(ts * 1000).toLocaleString("de-DE", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function fmtRelative(ts) {
+  if (!ts) return "Nie";
+  const diff = Math.floor(Date.now() / 1000) - ts;
+  if (diff < 60) return "Gerade eben";
+  if (diff < 3600) return `Vor ${Math.floor(diff / 60)} Min.`;
+  if (diff < 86400) return `Vor ${Math.floor(diff / 3600)} Std.`;
+  if (diff < 604800) return `Vor ${Math.floor(diff / 86400)} Tagen`;
+  return fmt(ts);
+}
+
+function fmtExp(exp) {
+  if (!exp) return { text: "Lifetime", badge: "Lifetime", isExp: false };
+  const now = Math.floor(Date.now() / 1000);
+  const diff = exp - now;
+  const dateStr = new Date(exp * 1000).toLocaleDateString("de-DE");
+  if (diff < 0) {
+    const ago = Math.abs(diff);
+    const daysAgo = Math.floor(ago / 86400);
+    return { text: dateStr, badge: `Abgelaufen (vor ${daysAgo}d)`, isExp: true };
+  }
+  const daysLeft = Math.ceil(diff / 86400);
+  return { text: dateStr, badge: `Noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'}`, isExp: false };
+}
+
+function normUrl(u) {
+  u = u.trim().replace(/\/+$/, "");
+  return /^https?:\/\//i.test(u) ? u : "http://" + u;
+}
+
+function setServerPreset(url) {
+  $("#url").value = url;
+}
+
+async function copyText(s, customMsg = "Kopiert!") {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(s);
+    } else {
+      throw new Error("fallback");
+    }
+  } catch (e) {
+    const a = el("textarea");
+    a.value = s;
+    document.body.append(a);
+    a.select();
+    try {
+      document.execCommand("copy");
+    } catch (e2) {
+      toast("Kopieren nicht unterstützt.");
+      a.remove();
+      return;
+    }
+    a.remove();
+  }
+  toast(customMsg);
+}
+
+/* ───────── API ───────── */
+async function api(path, { method = "GET", body, user = false } = {}) {
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const tk = user ? utoken : token;
+  if (tk) headers["Authorization"] = "Bearer " + tk;
+
+  let res;
+  try {
+    res = await fetch((user ? HOME : base) + path, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined
+    });
+  } catch (e) {
+    throw new Error("Server nicht erreichbar. Läuft `python fivem_boost.py server`?");
+  }
+
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+
+  if (res.status === 401 && user && utoken) {
+    userLogout("Sitzung abgelaufen – bitte erneut anmelden.");
+    throw new Error("Sitzung abgelaufen.");
+  }
+  if (res.status === 403 && user && utoken) {
+    const message = data.error || "Dein Konto ist gesperrt.";
+    userLogout(message);
+    throw new Error(message);
+  }
+  if (res.status === 401 && !user && token) {
+    logout("Sitzung abgelaufen – bitte erneut anmelden.");
+    throw new Error("Sitzung abgelaufen.");
+  }
+  if (!res.ok) throw new Error(data.error || "Server-Fehler (" + res.status + ")");
+  return data;
+}
+
+/* ───────── Auth & Views ───────── */
+function showLogin(msg) {
+  only("loginView");
+  $("#dashView").hidden = true;
+  $("#loginView").hidden = false;
+  const e = $("#loginErr");
+  e.hidden = !msg;
+  e.textContent = msg || "";
+}
+
+function logout(msg) {
+  token = "";
+  selectedUsers.clear();
+  currentAdminUsername = "";
+  isSuperAdmin = false;
+  session.del("boost_token");
+  local.del("boost_token");
+  $("#newBox").hidden = true;
+  licenses = []; users = []; admins = [];
+  showAuth(msg);
+}
+
+async function showDash() {
+  only("dashView");
+  $("#loginView").hidden = true;
+  $("#dashView").hidden = false;
+  if (!currentAdminUsername && token) currentAdminUsername = token.split(":", 1)[0];
+  $("#hostLabel").textContent = base.replace(/^https?:\/\//, "");
+  const identity = await api("/api/admin/me");
+  currentAdminUsername = identity.username;
+  isSuperAdmin = !!identity.is_superadmin;
+  $("#adminsSection").hidden = !isSuperAdmin;
+  const tasks = [loadList(), loadUsers()];
+  if (isSuperAdmin) tasks.push(loadAdmins());
+  await Promise.all(tasks);
+}
+
+$("#loginForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const url = normUrl($("#url").value);
+  const btn = $("#loginBtn");
+  $("#loginErr").hidden = true;
+
+  btn.disabled = true;
+  btn.textContent = "Melde an …";
+  base = url;
+  token = "";
+
+  try {
+    const d = await api("/api/admin/login", {
+      method: "POST",
+      body: { user: $("#user").value.trim(), password: $("#pw").value }
+    });
+    token = d.token;
+    currentAdminUsername = d.user || token.split(":", 1)[0];
+    isSuperAdmin = !!d.is_superadmin;
+    session.set("boost_token", token);
+    local.set("boost_token", token);
+    local.set("boost_server", base);
+    $("#pw").value = "";
+    await showDash();
+  } catch (e) {
+    token = "";
+    showLogin(e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "🔑 Anmelden";
+});
+
+$("#logoutBtn").addEventListener("click", () => logout("Erfolgreich abgemeldet."));
+$("#refreshBtn").addEventListener("click", () => {
+  const btn = $("#refreshBtn");
+  btn.textContent = "⏳ Lade...";
+  const tasks = [loadList(), loadUsers()];
+  if (isSuperAdmin) tasks.push(loadAdmins());
+  Promise.all(tasks)
+    .then(() => toast("Aktualisiert ✔"))
+    .catch(e => toast(e.message))
+    .finally(() => btn.textContent = "⟳ Aktualisieren");
+});
+
+/* ───────── Licenses Loading & Rendering ───────── */
+async function loadList() {
+  const d = await api("/api/admin/licenses");
+  licenses = d.licenses || [];
+  render(d.stats);
+}
+
+async function loadUsers() {
+  const d = await api("/api/admin/users");
+  users = d.users || [];
+  const knownIds = new Set(users.map(u => Number(u.id)));
+  for (const id of selectedUsers) if (!knownIds.has(Number(id))) selectedUsers.delete(id);
+  renderUsers();
+}
+
+async function loadAdmins() {
+  const d = await api("/api/admin/admins");
+  admins = d.admins || [];
+  renderAdmins();
+}
+
+function renderAdmins() {
+  const tb = $("#adminsTb");
+  tb.replaceChildren();
+  $("#adminsCount").textContent = admins.length;
+  for (const admin of admins) {
+    const state = el("span", { class: `tag ${admin.is_active ? "ok" : "err"}` }, admin.is_active ? "● Aktiv" : "● Gesperrt");
+    const name = el("div", { class: "user-admin-name" },
+      el("b", {}, admin.username),
+      admin.is_self ? el("span", { class: "user-admin-meta" }, "Dein Konto") : null);
+    const edit = el("button", { type: "button", class: "ghost sm", onclick: () => openAdminModal(admin) }, "✏️ Bearbeiten");
+    const toggle = el("button", {
+      type: "button", class: admin.is_active ? "danger sm" : "success sm",
+      onclick: () => actAdmin(() => api(`/api/admin/admins/${admin.id}/toggle`, { method: "POST" }),
+        admin.is_active ? "Admin gesperrt." : "Admin freigeschaltet.")
+    }, admin.is_active ? "Sperren" : "Freischalten");
+    const remove = el("button", {
+      type: "button", class: "danger sm",
+      onclick: async () => {
+        if (await showCustomConfirm(`Admin-Konto „${admin.username}“ dauerhaft löschen?`, {
+          title: "Adminzugang löschen?", confirmText: "Admin löschen"
+        })) {
+          await actAdmin(() => api(`/api/admin/admins/${admin.id}`, { method: "DELETE" }), "Admin gelöscht.");
+        }
+      }
+    }, "🗑 Löschen");
+    toggle.disabled = admin.is_self;
+    remove.disabled = admin.is_self;
+    tb.append(el("tr", {},
+      el("td", {}, name),
+      el("td", {}, el("span", { class: "user-admin-meta" }, fmt(admin.created_at))),
+      el("td", {}, state),
+      el("td", { style: "text-align:right" }, el("div", { class: "user-admin-actions" }, edit, toggle, remove))
+    ));
+  }
+  $("#adminsEmpty").hidden = admins.length > 0;
+}
+
+async function actAdmin(fn, msg) {
+  try {
+    await fn();
+    await loadAdmins();
+    if (msg) toast(msg);
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+}
+
+function openAdminModal(admin = null) {
+  currentEditAdmin = admin;
+  $("#adminEditTitle").textContent = admin ? "🛡 Admin bearbeiten" : "🛡 Admin hinzufügen";
+  $("#adminEditUsername").value = admin?.username || "";
+  $("#adminEditPassword").value = "";
+  $("#adminEditPasswordField").hidden = !admin;
+  $("#adminEditPassword").required = false;
+  $("#adminEditPassword").placeholder = "Leer lassen, um es beizubehalten";
+  $("#adminPasswordOptional").textContent = admin ? "(optional, leer lassen = unverändert)" : "";
+  $("#adminEditHint").textContent = admin?.is_self
+    ? "Wenn du deinen Benutzernamen änderst, wird deine Sitzung automatisch aktualisiert."
+    : admin
+      ? "Der Admin kann sich mit dem neuen Benutzernamen anmelden. Ein neues Passwort ist optional."
+      : "Beim Erstellen wird ein zufälliges Passwort im Format revolt-XXXXXXXXXXXX erzeugt und anschließend einmal angezeigt.";
+  $("#adminEditModal").hidden = false;
+  setTimeout(() => $("#adminEditUsername").focus(), 30);
+}
+
+function closeAdminModal() {
+  $("#adminEditModal").hidden = true;
+  $("#adminEditForm").reset();
+  currentEditAdmin = null;
+}
+
+$("#adminCreateBtn").addEventListener("click", () => openAdminModal());
+$("#adminEditClose").addEventListener("click", closeAdminModal);
+$("#adminEditCancel").addEventListener("click", closeAdminModal);
+$("#adminEditModal").addEventListener("click", ev => {
+  if (ev.target === $("#adminEditModal")) closeAdminModal();
+});
+$("#adminEditForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const username = $("#adminEditUsername").value.trim();
+  const password = $("#adminEditPassword").value;
+  if (currentEditAdmin && password && password.length < 8) {
+    return toast("Das Adminpasswort muss mindestens 8 Zeichen lang sein.");
+  }
+  const btn = $("#adminEditSave");
+  btn.disabled = true;
+  const wasEditing = !!currentEditAdmin;
+  const wasSelf = !!currentEditAdmin?.is_self;
+  const body = { username };
+  if (wasEditing && password) body.password = password;
+  try {
+    const result = await api(currentEditAdmin ? `/api/admin/admins/${currentEditAdmin.id}` : "/api/admin/admins", {
+      method: currentEditAdmin ? "PUT" : "POST", body
+    });
+    if (result.token) {
+      token = result.token;
+      session.set("boost_token", token);
+      local.set("boost_token", token);
+      currentAdminUsername = result.username || currentAdminUsername;
+    }
+    else if (wasSelf) currentAdminUsername = result.username || currentAdminUsername;
+    closeAdminModal();
+    if (!wasEditing && result.temporary_password) {
+      $("#adminCredentialUser").textContent = `Benutzername: ${result.username || username}`;
+      $("#adminCredentialPassword").textContent = result.temporary_password;
+      $("#adminCredentialModal").hidden = false;
+      setTimeout(() => $("#adminCredentialCopy").focus(), 30);
+    }
+    await loadAdmins();
+    if (wasEditing) toast("Admin-Konto aktualisiert.");
+    else if (!result.temporary_password) {
+      toast("Konto erstellt, aber der Server hat kein Passwort zurückgegeben. Bitte Serverdatei aktualisieren.");
+    }
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function closeAdminCredentialModal() {
+  $("#adminCredentialModal").hidden = true;
+  $("#adminCredentialPassword").textContent = "";
+}
+
+$("#adminCredentialClose").addEventListener("click", closeAdminCredentialModal);
+$("#adminCredentialDone").addEventListener("click", closeAdminCredentialModal);
+$("#adminCredentialModal").addEventListener("click", ev => {
+  if (ev.target === $("#adminCredentialModal")) closeAdminCredentialModal();
+});
+$("#adminCredentialCopy").addEventListener("click", () => {
+  copyText($("#adminCredentialPassword").textContent, "Admin-Passwort kopiert!");
+});
+
+function visibleUsers() {
+  const q = $("#usersQ").value.toLowerCase().trim();
+  const status = $("#usersStatus").value;
+  return users.filter(u => {
+    const text = `${u.name || ""} ${u.email || ""} ${u.discord || ""} ${u.license?.key || ""}`.toLowerCase();
+    return (!q || text.includes(q)) && (!status || (status === "active" ? u.is_active : !u.is_active));
+  });
+}
+
+function updateUserBulkUI(shown = visibleUsers()) {
+  const count = selectedUsers.size;
+  $("#usersSelectionCount").textContent = `${count} ausgewählt`;
+  ["#usersActivate", "#usersSuspend", "#usersDelete"].forEach(id => { $(id).disabled = count === 0; });
+  const selectAll = $("#usersSelectAll");
+  const selectedVisible = shown.filter(u => selectedUsers.has(Number(u.id))).length;
+  selectAll.checked = shown.length > 0 && selectedVisible === shown.length;
+  selectAll.indeterminate = selectedVisible > 0 && selectedVisible < shown.length;
+}
+
+function renderUsers() {
+  const shown = visibleUsers();
+  $("#registeredUsersCount").textContent = shown.length === users.length
+    ? users.length : `${shown.length}/${users.length}`;
+  const tb = $("#usersTb");
+  tb.replaceChildren();
+  for (const [index, u] of shown.entries()) {
+    const state = el("span", { class: `tag ${u.is_active ? "ok" : "err"}` }, u.is_active ? "● Aktiv" : "● Gesperrt");
+    const license = u.license
+      ? el("div", { class: "user-cell" },
+          el("code", { class: "key-code", title: "Klicken zum Kopieren", onclick: () => copyText(u.license.key) }, u.license.key),
+          el("span", { class: "user-note" }, u.license.status))
+      : el("span", { class: "user-admin-meta" }, "Keine Lizenz verknüpft");
+    const row = el("tr", {});
+    row.style.setProperty("--row-index", index);
+    const select = el("input", { type: "checkbox", "aria-label": `${u.name || u.email} auswählen` });
+    select.checked = selectedUsers.has(Number(u.id));
+    select.addEventListener("change", () => {
+      if (select.checked) selectedUsers.add(Number(u.id));
+      else selectedUsers.delete(Number(u.id));
+      updateUserBulkUI(shown);
+    });
+    row.append(
+      el("td", {}, el("div", { class: "user-select-cell" }, select, el("div", { class: "user-admin-name" },
+        el("b", {}, u.name || "–"),
+        el("span", {}, u.email || "–"),
+        u.discord ? el("span", {}, `Discord: ${u.discord}`) : null))),
+      el("td", {}, license),
+      el("td", {}, el("span", { class: "user-admin-meta", title: fmt(u.created_at) }, fmt(u.created_at).split(" ")[0])),
+      el("td", {}, el("span", { class: "user-admin-meta", title: fmt(u.last_login) }, fmtRelative(u.last_login))),
+      el("td", {}, el("span", { class: "user-admin-state" }, state)),
+      el("td", { style: "text-align:right" }, el("div", { class: "user-admin-actions" },
+        el("button", { class: "ghost sm", onclick: () => openUserEditModal(u) }, "✏️ Bearbeiten"),
+        el("button", {
+          class: u.is_active ? "danger sm" : "success sm",
+          onclick: () => actUser(() => api(`/api/admin/users/${u.id}/toggle`, { method: "POST" }),
+            u.is_active ? "Konto gesperrt" : "Konto entsperrt")
+        }, u.is_active ? "Sperren" : "Entsperren"),
+        el("button", { class: "danger sm", onclick: async () => {
+          if (await showCustomConfirm(`Konto von ${u.name} (${u.email}) dauerhaft löschen? Eine verknüpfte Lizenz wird dabei vom Konto gelöst.`, {
+            title: "Benutzerkonto löschen?", confirmText: "Konto löschen"
+          })) {
+            await actUser(() => api(`/api/admin/users/${u.id}`, { method: "DELETE" }), "Konto gelöscht");
+          }
+        } }, "🗑️ Löschen")
+      ))
+    );
+    tb.append(row);
+  }
+  const empty = $("#usersEmpty");
+  empty.hidden = shown.length > 0;
+  empty.textContent = users.length ? "Keine Konten passen zu deiner Suche." : "Es wurden noch keine Konten registriert.";
+  updateUserBulkUI(shown);
+}
+
+async function bulkUserAction(action) {
+  const ids = [...selectedUsers];
+  if (!ids.length) return;
+  if (action === "delete" && !(await showCustomConfirm(`${ids.length} ausgewählte Konten dauerhaft löschen? Verknüpfte Lizenzen bleiben bestehen.`, {
+    title: "Ausgewählte Konten löschen?", confirmText: "Konten löschen"
+  }))) return;
+  const labels = { activate: "freigeschaltet", suspend: "gesperrt", delete: "gelöscht" };
+  try {
+    let affected = 0;
+    for (let i = 0; i < ids.length; i += 500) {
+      const result = await api("/api/admin/users/bulk", {
+        method: "POST", body: { action, ids: ids.slice(i, i + 500) }
+      });
+      affected += Number(result.affected || 0);
+    }
+    selectedUsers.clear();
+    await loadUsers();
+    toast(`${affected} Konto/Konten ${labels[action]}.`);
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+}
+
+function exportUsersCsv() {
+  if (!users.length) return toast("Keine Konten zum Exportieren vorhanden.");
+  const cell = value => {
+    const text = String(value ?? "");
+    const safe = /^[\s]*[=+\-@]/.test(text) ? "'" + text : text;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+  const rows = [["ID", "Name", "E-Mail", "Discord", "Status", "Lizenzkey", "Lizenzstatus", "Registriert", "Letzter_Login"]];
+  for (const u of users) rows.push([
+    u.id, u.name, u.email, u.discord, u.is_active ? "Aktiv" : "Gesperrt",
+    u.license?.key || "", u.license?.status || "Keine Lizenz", fmt(u.created_at), fmt(u.last_login)
+  ]);
+  const blob = new Blob(["\uFEFF" + rows.map(row => row.map(cell).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: `revolt_benutzer_${Date.now()}.csv` });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast("Benutzer-CSV heruntergeladen.");
+}
+
+async function actUser(fn, msg) {
+  try {
+    await fn();
+    await loadUsers();
+    if (msg) toast(msg);
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+}
+
+function openUserEditModal(user) {
+  currentEditUser = user;
+  $("#userEditName").value = user.name || "";
+  $("#userEditEmail").value = user.email || "";
+  $("#userEditModal").hidden = false;
+}
+
+function closeUserEditModal() {
+  $("#userEditModal").hidden = true;
+  currentEditUser = null;
+}
+
+$("#userEditClose").addEventListener("click", closeUserEditModal);
+$("#userEditCancel").addEventListener("click", closeUserEditModal);
+$("#userEditForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!currentEditUser) return;
+  const btn = $("#userEditSave");
+  btn.disabled = true;
+  try {
+    await api(`/api/admin/users/${currentEditUser.id}`, {
+      method: "PUT", body: { name: $("#userEditName").value, email: $("#userEditEmail").value }
+    });
+    closeUserEditModal();
+    await loadUsers();
+    toast("Benutzerkonto aktualisiert ✔");
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("#usersQ").addEventListener("input", renderUsers);
+$("#usersStatus").addEventListener("change", renderUsers);
+$("#usersSelectAll").addEventListener("change", () => {
+  for (const user of visibleUsers()) {
+    if ($("#usersSelectAll").checked) selectedUsers.add(Number(user.id));
+    else selectedUsers.delete(Number(user.id));
+  }
+  renderUsers();
+});
+$("#usersActivate").addEventListener("click", () => bulkUserAction("activate"));
+$("#usersSuspend").addEventListener("click", () => bulkUserAction("suspend"));
+$("#usersDelete").addEventListener("click", () => bulkUserAction("delete"));
+$("#usersExport").addEventListener("click", exportUsersCsv);
+
+function closeCommandPalette() {
+  $("#commandPalette").hidden = true;
+}
+
+function openCommandPalette() {
+  if (!token || $("#dashView").hidden) return;
+  $("#commandPalette").hidden = false;
+  $("#commandInput").value = "";
+  $("#commandList").querySelectorAll("[data-command]").forEach(item => item.hidden = false);
+  requestAnimationFrame(() => $("#commandInput").focus());
+}
+
+$("#commandInput").addEventListener("input", () => {
+  const q = $("#commandInput").value.toLowerCase().trim();
+  $("#commandList").querySelectorAll("[data-command]").forEach(item => {
+    item.hidden = !item.textContent.toLowerCase().includes(q);
+  });
+});
+$("#commandPalette").addEventListener("click", ev => {
+  if (ev.target === $("#commandPalette")) return closeCommandPalette();
+  const button = ev.target.closest("[data-command]");
+  if (!button) return;
+  const command = button.dataset.command;
+  closeCommandPalette();
+  if (command === "refresh") $("#refreshBtn").click();
+  if (command === "license-search") {
+    $("#q").scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => $("#q").focus({ preventScroll: true }), 180);
+  }
+  if (command === "user-search") {
+    $("#registeredUsersSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => $("#usersQ").focus({ preventScroll: true }), 180);
+  }
+  if (command === "create-license") {
+    $("#createForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => $("#note").focus({ preventScroll: true }), 180);
+  }
+  if (command === "export-users") exportUsersCsv();
+  if (command === "logout") $("#logoutBtn").click();
+});
+
+document.addEventListener("keydown", ev => {
+  const paletteOpen = !$("#commandPalette").hidden;
+  if (token && !$("#dashView").hidden && (ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "k") {
+    ev.preventDefault();
+    paletteOpen ? closeCommandPalette() : openCommandPalette();
+    return;
+  }
+  if (paletteOpen && ev.key === "Escape") {
+    ev.preventDefault(); closeCommandPalette(); return;
+  }
+  if (!token || $("#dashView").hidden || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const target = ev.target;
+  if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+  if (ev.key.toLowerCase() === "r") { ev.preventDefault(); $("#refreshBtn").click(); }
+  if (ev.key === "/") { ev.preventDefault(); $("#usersQ").focus(); }
+  if (ev.key.toLowerCase() === "l") { ev.preventDefault(); $("#q").focus(); }
+});
+
+function render(serverStats) {
+  const stats = serverStats || {
+    total: licenses.length,
+    active: licenses.filter(l => l.status === "aktiv").length,
+    expired: licenses.filter(l => l.status === "abgelaufen").length,
+    revoked: licenses.filter(l => l.status === "gesperrt").length,
+    bound: licenses.filter(l => l.bound).length,
+    today_active: licenses.filter(l => l.last_seen && (Date.now() / 1000 - l.last_seen) < 86400).length
+  };
+
+  $("#sTotal").textContent = stats.total;
+  $("#sActive").textContent = stats.active;
+  $("#sExpired").textContent = stats.expired;
+  $("#sRevoked").textContent = stats.revoked;
+  $("#sBound").textContent = stats.bound;
+  $("#sToday").textContent = stats.today_active;
+
+  const q = $("#q").value.toLowerCase().trim();
+  const st = $("#st").value;
+  const fb = $("#filterBound").value;
+  const sort = $("#sortBy").value;
+
+  let shown = licenses.filter(l => {
+    const matchesQ = !q || (l.key + " " + (l.note || "") + " " + (l.hwid || "")).toLowerCase().includes(q);
+    const matchesSt = !st || l.status === st;
+    const matchesBound = !fb || (fb === "gebunden" ? l.bound : !l.bound);
+    return matchesQ && matchesSt && matchesBound;
+  });
+
+  // Sorting
+  shown.sort((a, b) => {
+    if (sort === "newest") return b.id - a.id;
+    if (sort === "oldest") return a.id - b.id;
+    if (sort === "seen") return (b.last_seen || 0) - (a.last_seen || 0);
+    if (sort === "exp") {
+      if (!a.expires_at) return 1;
+      if (!b.expires_at) return -1;
+      return a.expires_at - b.expires_at;
+    }
+    return b.id - a.id;
+  });
+
+  $("#countFiltered").textContent = shown.length;
+
+  const tb = $("#tb");
+  tb.replaceChildren();
+
+  for (const l of shown) {
+    const expInfo = fmtExp(l.expires_at);
+
+    const statusBadge = el("span", {
+      class: l.status === "aktiv" ? "tag ok" : (l.status === "gesperrt" ? "tag err" : "tag warn")
+    }, "● " + l.status.toUpperCase());
+
+    const boundBadge = l.bound
+      ? el("span", { class: "tag bound", title: "HWID: " + l.hwid }, "💻 Gebunden")
+      : el("span", { class: "tag" }, "🔓 Frei");
+
+    const row = el("tr", {},
+      // Key
+      el("td", {},
+        el("code", {
+          class: "key-code",
+          title: "Klicken zum Kopieren",
+          onclick: () => copyText(l.key, "Key kopiert: " + l.key)
+        }, l.key)
+      ),
+
+      // Benutzer / Notiz
+      el("td", {},
+        el("div", { class: "user-cell" },
+          el("span", { class: "user-name" }, l.note ? l.note : el("i", { style: "color:var(--muted);font-weight:normal" }, "Keine Notiz")),
+          el("span", { class: "user-note" }, `ID #${l.id} · Erstellt: ${fmt(l.created_at).split(" ")[0]}`)
+        )
+      ),
+
+      // Status
+      el("td", {}, statusBadge),
+
+      // Laufzeit / Ablauf
+      el("td", {},
+        el("div", { class: "user-cell" },
+          el("span", { style: "font-weight:600" }, expInfo.text),
+          el("span", { style: `font-size:11px; color:${expInfo.isExp ? 'var(--err)' : 'var(--muted)'}` }, expInfo.badge)
+        )
+      ),
+
+      // PC-Bindung
+      el("td", {}, boundBadge),
+
+      // Zuletzt aktiv
+      el("td", {},
+        el("span", { title: fmt(l.last_seen), style: "font-size:12px; color:var(--muted)" }, fmtRelative(l.last_seen))
+      ),
+
+      // Aktionen
+      el("td", { style: "text-align:right" },
+        el("div", { class: "actions", style: "justify-content:flex-end" },
+          el("button", {
+            class: "ghost sm",
+            title: "Key kopieren",
+            onclick: () => copyText(l.key)
+          }, "📋"),
+
+          el("button", {
+            class: "ghost sm",
+            title: "Benutzer / Lizenz bearbeiten",
+            onclick: () => openEditModal(l)
+          }, "✏️ Bearbeiten"),
+
+          el("button", {
+            class: l.status === "gesperrt" ? "success sm" : "ghost sm",
+            title: l.status === "gesperrt" ? "Entsperren" : "Sperren",
+            onclick: () => act(() => api(`/api/admin/licenses/${l.id}/toggle`, { method: "POST" }),
+              l.status === "gesperrt" ? "Benutzer entsperrt" : "Benutzer gesperrt")
+          }, l.status === "gesperrt" ? "Entsperren" : "Sperren"),
+
+          l.bound ? el("button", {
+            class: "ghost sm",
+            title: "HWID / PC-Bindung aufheben",
+            onclick: () => act(() => api(`/api/admin/licenses/${l.id}/reset`, { method: "POST" }), "PC-Bindung gelöst")
+          }, "💻 Lösen") : null,
+
+          el("button", {
+            class: "danger sm",
+            title: "Lizenz löschen",
+            onclick: async () => {
+              if (await showCustomConfirm(`Soll der Key „${l.key}“ (${l.note || "Kein Name"}) wirklich unwiderruflich gelöscht werden?`, {
+                title: "Lizenz endgültig löschen?", confirmText: "Key löschen"
+              })) {
+                await act(() => api(`/api/admin/licenses/${l.id}`, { method: "DELETE" }), "Gelöscht");
+              }
+            }
+          }, "🗑️")
+        )
+      )
+    );
+
+    tb.append(row);
+  }
+
+  const e = $("#empty");
+  e.hidden = shown.length > 0;
+  e.textContent = licenses.length ? "Keine Lizenzen gefunden, die deiner Suche entsprechen." : "Noch keine Lizenzen vorhanden – erstelle oben deine erste!";
+}
+
+async function act(fn, msg) {
+  try {
+    await fn();
+    await Promise.all([loadList(), loadUsers()]);
+    if (msg) toast(msg);
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+}
+
+$("#q").addEventListener("input", () => render());
+$("#st").addEventListener("change", () => render());
+$("#filterBound").addEventListener("change", () => render());
+$("#sortBy").addEventListener("change", () => render());
+
+/* ───────── Create Keys ───────── */
+$("#days").addEventListener("change", ev => {
+  $("#customDaysBox").hidden = ev.target.value !== "custom";
+});
+
+$("#createForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = $("#createBtn");
+  btn.disabled = true;
+  btn.textContent = "Erstelle...";
+
+  const daysSelect = $("#days").value;
+  const days = daysSelect === "custom" ? Number($("#customDays").value) : Number(daysSelect);
+  const note = $("#note").value.trim();
+  const count = Number($("#count").value);
+  const customKey = $("#customKey").value.trim();
+
+  try {
+    const d = await api("/api/admin/licenses", {
+      method: "POST",
+      body: { note, days, count, custom_key: customKey }
+    });
+
+    lastCreatedKeys = d.keys;
+    lastCreatedNote = note;
+    lastCreatedDays = days;
+
+    $("#newTitle").textContent = `✔ ${d.keys.length} ${d.keys.length === 1 ? 'NEUE LIZENZ' : 'NEUE LIZENZEN'} ERSTELLT`;
+    $("#newList").replaceChildren(...d.keys.map(k => el("div", { class: "keyline" },
+      el("code", {}, k),
+      el("span", { class: "key-details" },
+        `${note ? '👤 ' + note + ' · ' : ''}⏳ ${days === 0 ? 'Lifetime' : days + ' Tage'}`
+      ),
+      el("button", { class: "ghost sm", onclick: () => copyText(k) }, "📋 Kopieren")
+    )));
+
+    $("#newBox").hidden = false;
+    $("#note").value = "";
+    $("#customKey").value = "";
+    $("#count").value = "1";
+    toast("✔ " + d.keys.length + " Lizenz(en) erfolgreich erstellt!");
+    await loadList();
+  } catch (e) {
+    toast(e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "🚀 Lizenz erstellen";
+});
+
+$("#newClose").addEventListener("click", () => $("#newBox").hidden = true);
+$("#copyAll").addEventListener("click", () => copyText(lastCreatedKeys.join("\n"), "Alle Keys kopiert!"));
+
+$("#copyDiscord").addEventListener("click", () => {
+  const durationText = lastCreatedDays === 0 ? "Lifetime (dauerhaft unbegrenzt)" : `${lastCreatedDays} Tage`;
+  let msg = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nREVOLT OPTIMIZER – DEIN LIZENZKEY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  if (lastCreatedNote) msg += `👤 Benutzer: ${lastCreatedNote}\n`;
+  msg += `🔑 Key: ${lastCreatedKeys.join("\n🔑 Key: ")}\n⏳ Laufzeit: ${durationText}\n\n`;
+  msg += `Anleitung:\n1. Starte 'revolt optimizer.exe'\n2. Gib deinen Key ein und klicke auf 'Aktivieren'\n3. Wähle deine Optimierungen & starte mit maximalen FPS durch!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+  copyText(msg, "Discord-Nachricht kopiert! Bereit zum Versenden.");
+});
+
+$("#downloadTxt").addEventListener("click", () => {
+  const durationText = lastCreatedDays === 0 ? "Lifetime" : `${lastCreatedDays} Tage`;
+  const content = `REVOLT OPTIMIZER - NEUE LIZENZEN (${new Date().toLocaleString("de-DE")})\nKunde/Notiz: ${lastCreatedNote || 'Keine'}\nLaufzeit: ${durationText}\n\nKeys:\n` + lastCreatedKeys.join("\n");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: `fivem_boost_keys_${Date.now()}.txt` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Datei heruntergeladen!");
+});
+
+/* ───────── Edit Modal ───────── */
+function openEditModal(license) {
+  currentEditLicense = license;
+  $("#editKey").textContent = license.key;
+  $("#editNote").value = license.note || "";
+  $("#editStatus").value = license.status === "gesperrt" ? "revoked" : "active";
+  $("#editExtend").value = "keep";
+    syncCustomSelect($("#editStatus"));
+    syncCustomSelect($("#editExtend"));
+
+  const hwidBox = $("#editHwidText");
+  if (license.hwid) {
+    hwidBox.innerHTML = `Gebunden an HWID: <code style="color:#fff">${license.hwid}</code>`;
+    $("#editResetHwidBtn").hidden = false;
+  } else {
+    hwidBox.textContent = "Aktuell an keinen PC gebunden (frei).";
+    $("#editResetHwidBtn").hidden = true;
+  }
+
+  $("#editModal").hidden = false;
+}
+
+function closeEditModal() {
+  $("#editModal").hidden = true;
+  currentEditLicense = null;
+}
+
+$("#editCopyKey").addEventListener("click", () => {
+  if (currentEditLicense) copyText(currentEditLicense.key);
+});
+
+$("#editResetHwidBtn").addEventListener("click", async () => {
+  if (!currentEditLicense) return;
+  try {
+    await api(`/api/admin/licenses/${currentEditLicense.id}/reset`, { method: "POST" });
+    currentEditLicense.bound = false;
+    currentEditLicense.hwid = null;
+    $("#editHwidText").textContent = "PC-Bindung erfolgreich aufgehoben!";
+    $("#editResetHwidBtn").hidden = true;
+    toast("HWID gelöst.");
+    await loadList();
+  } catch (e) {
+    toast(e.message);
+  }
+});
+
+$("#editForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!currentEditLicense) return;
+
+  const note = $("#editNote").value.trim();
+  const revoked = $("#editStatus").value === "revoked";
+  const extendOpt = $("#editExtend").value;
+
+  try {
+    // Update basic info
+    await api(`/api/admin/licenses/${currentEditLicense.id}`, {
+      method: "PUT",
+      body: { note, revoked }
+    });
+
+    // Handle extension if requested
+    if (extendOpt !== "keep") {
+      const days = extendOpt === "lifetime" ? 0 : Number(extendOpt);
+      await api(`/api/admin/licenses/${currentEditLicense.id}/extend`, {
+        method: "POST",
+        body: { days }
+      });
+    }
+
+    toast("Änderungen gespeichert ✔");
+    closeEditModal();
+    await loadList();
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+});
+
+/* ───────── Export CSV ───────── */
+$("#exportBtn").addEventListener("click", () => {
+  if (!licenses.length) {
+    toast("Keine Lizenzen zum Exportieren vorhanden.");
+    return;
+  }
+  const rows = [
+    ["ID", "Key", "Benutzer_Notiz", "Status", "Erstellt_am", "Laeuft_ab", "HWID", "Zuletzt_aktiv"]
+  ];
+  for (const l of licenses) {
+    rows.push([
+      l.id,
+      `"${l.key}"`,
+      `"${(l.note || '').replace(/"/g, '""')}"`,
+      l.status,
+      `"${fmt(l.created_at)}"`,
+      `"${l.expires_at ? fmt(l.expires_at) : 'Lifetime'}"`,
+      `"${l.hwid || ''}"`,
+      `"${fmt(l.last_seen)}"`
+    ]);
+  }
+  const csvContent = "\uFEFF" + rows.map(r => r.join(";")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: `fivem_boost_licenses_${Date.now()}.csv` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("CSV erfolgreich heruntergeladen!");
+});
+
+/* ═════════════════════════ KUNDENPORTAL ═════════════════════════ */
+const HOME = location.protocol.startsWith("http") ? location.origin : "http://5.253.246.114:5050";
+const VIEWS = ["authView", "portalView", "loginView", "dashView"];
+let utoken = "", me = null, registrationChallengeId = "", challengeLoadSeq = 0;
+
+function only(id) { VIEWS.forEach(v => $("#" + v).hidden = v !== id); window.scrollTo(0, 0); }
+const uapi = (path, opt = {}) => api(path, { ...opt, user: true });
+const dt = ts => ts ? new Date(ts * 1000).toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" }) : "–";
+function busy(btn, on, label) { btn.disabled = on; btn.textContent = label; }
+function showAuth(msg) {
+  only("authView");
+  const e = $("#authErr"); e.hidden = !msg; e.textContent = msg || "";
+}
+async function loadRegistrationChallenge() {
+  const seq = ++challengeLoadSeq, button = $("#refreshRegChallenge");
+  registrationChallengeId = "";
+  $("#regChallengePrompt").textContent = "Sicherheitsfrage wird geladen …";
+  $("#regChallengeAnswer").value = "";
+  button.disabled = true;
+  try {
+    const d = await uapi("/api/auth/challenge", { method: "POST", body: {} });
+    if (seq !== challengeLoadSeq) return;
+    registrationChallengeId = d.challenge_id;
+    $("#regChallengePrompt").textContent = d.prompt;
+  } catch (e) {
+    if (seq !== challengeLoadSeq) return;
+    $("#regChallengePrompt").textContent = "Sicherheitsfrage konnte nicht geladen werden.";
+    showAuth(e.message);
+  } finally {
+    if (seq === challengeLoadSeq) button.disabled = false;
+  }
+}
+function userLogout(msg) {
+  utoken = ""; me = null; local.del("revolt_utoken"); session.del("revolt_utoken");
+  showAuth(msg);
+}
+function setTab(t) {
+  const login = t === "login";
+  $("#tabLogin").classList.toggle("on", login); $("#tabReg").classList.toggle("on", !login);
+  $("#userLoginForm").hidden = !login; $("#regForm").hidden = login;
+  $("#authTitle").textContent = login ? "Willkommen zurück" : "Konto erstellen";
+  $("#authSub").textContent = login ? "Melde dich an, um fortzufahren." : "Registriere dich kostenlos in wenigen Sekunden.";
+  $("#authErr").hidden = true;
+  if (!login) loadRegistrationChallenge();
+}
+$("#tabLogin").onclick = () => setTab("login");
+$("#tabReg").onclick = () => setTab("reg");
+$("#refreshRegChallenge").onclick = () => loadRegistrationChallenge();
+$("#toAdmin").onclick = () => showLogin();
+document.querySelectorAll(".eye").forEach(b => b.onclick = () => {
+  const i = $("#" + b.dataset.for), show = i.type === "password";
+  i.type = show ? "text" : "password"; b.textContent = show ? "Verbergen" : "Zeigen";
+});
+
+/* Passwortstärke */
+$("#rPw").addEventListener("input", () => {
+  const v = $("#rPw").value;
+  let sc = 0; if (v.length >= 8) sc++; if (v.length >= 12) sc++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) sc++; if (/\d/.test(v)) sc++; if (/[^A-Za-z0-9]/.test(v)) sc++;
+  const lv = !v ? 0 : Math.min(4, Math.max(1, sc - (v.length < 8 ? 1 : 0)));
+  const cols = ["transparent", "#777777", "#aaaaaa", "#dddddd", "#ffffff"], lbl = ["", "Schwach", "Mittel", "Gut", "Sehr stark"];
+  $("#meterBar").style.width = lv * 25 + "%"; $("#meterBar").style.background = cols[lv]; $("#meterLbl").textContent = lbl[lv];
+});
+
+async function authDone(d, remember) {
+  utoken = d.token; me = d.user;
+  (remember ? local : session).set("revolt_utoken", utoken);
+  (remember ? session : local).del("revolt_utoken");
+  await enterPortal();
+}
+$("#userLoginForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const b = $("#ulBtn"); $("#authErr").hidden = true;
+  if (!$("#uEmail").value.trim() || !$("#uPw").value) return showAuth("Bitte E-Mail und Passwort eingeben.");
+  busy(b, true, "Melde an …");
+  try {
+    const d = await uapi("/api/auth/login", { method: "POST", body: { email: $("#uEmail").value, password: $("#uPw").value } });
+    $("#uPw").value = ""; await authDone(d, $("#uRemember").checked);
+  } catch (e) { showAuth(e.message); }
+  busy(b, false, "Anmelden");
+});
+$("#regForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const b = $("#rgBtn"), pw = $("#rPw").value;
+  if (!$("#rName").value.trim()) return showAuth("Bitte gib deinen Namen ein.");
+  if (!$("#rEmail").value.trim()) return showAuth("Bitte gib deine E-Mail-Adresse ein.");
+  if (pw.length < 8) return showAuth("Das Passwort muss mindestens 8 Zeichen lang sein.");
+  if (pw !== $("#rPw2").value) return showAuth("Die Passwörter stimmen nicht überein.");
+  if (!registrationChallengeId) return showAuth("Die Sicherheitsfrage ist noch nicht bereit. Lade bitte eine neue.");
+  if (!/^\d{1,3}$/.test($("#regChallengeAnswer").value.trim())) return showAuth("Bitte beantworte die Sicherheitsfrage.");
+  busy(b, true, "Erstelle Konto …");
+  try {
+    const d = await uapi("/api/auth/register", { method: "POST", body: {
+      name: $("#rName").value, email: $("#rEmail").value, password: pw,
+      challenge_id: registrationChallengeId,
+      challenge_answer: $("#regChallengeAnswer").value.trim(),
+      website: $("#regWebsite").value
+    } });
+    registrationChallengeId = "";
+    $("#rPw").value = $("#rPw2").value = $("#regChallengeAnswer").value = $("#regWebsite").value = "";
+    await authDone(d, true);
+    toast("Konto erstellt. Willkommen an Bord!");
+  } catch (e) {
+    showAuth(e.message);
+    await loadRegistrationChallenge();
+  }
+  busy(b, false, "Konto erstellen");
+});
+$("#regChallengeAnswer").addEventListener("input", ev => {
+  ev.target.value = ev.target.value.replace(/\D/g, "").slice(0, 3);
+});
+$("#uLogout").onclick = () => userLogout("Du wurdest abgemeldet.");
+$("#backPortal") && ($("#backPortal").onclick = () => showAuth());
+
+
+function switchPortalTab(tabName) {
+  document.querySelectorAll('.portal-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.portal-tab-pane').forEach(p => {
+    p.hidden = (p.id !== 'tab-' + tabName);
+  });
+}
+
+/* Portal */
+async function enterPortal() {
+  if (!me) me = (await uapi("/api/me")).user;
+  only("portalView"); renderMe(); loadDl();
+}
+function paintAv(node) {
+  node.replaceChildren();
+  if (me.avatar) { const i = new Image(); i.alt = ""; i.src = me.avatar; node.append(i); }
+  else node.textContent = me.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+function renderMe() {
+  paintAv($("#avChip")); paintAv($("#avBig")); paintAv($("#homeAvBig"));
+  if ($("#chipName")) $("#chipName").textContent = me.name;
+  if ($("#homeWelcomeName")) $("#homeWelcomeName").textContent = me.name;
+  if ($("#homeName")) $("#homeName").textContent = me.name;
+  if ($("#homeEmail")) $("#homeEmail").textContent = me.email;
+  if ($("#homeDiscord")) $("#homeDiscord").textContent = me.discord || "–";
+  if ($("#homeSince")) $("#homeSince").textContent = dt(me.created_at);
+  if ($("#homeLast")) $("#homeLast").textContent = dt(me.last_login);
+  if ($("#pName")) $("#pName").value = me.name;
+  if ($("#pEmail")) $("#pEmail").value = me.email;
+  if ($("#pDiscord")) $("#pDiscord").value = me.discord || "";
+  if ($("#pSince")) $("#pSince").textContent = dt(me.created_at);
+  if ($("#pLast")) $("#pLast").textContent = dt(me.last_login);
+  const l = me.license, box = $("#licInfo"); box.replaceChildren();
+  $("#licForm").hidden = !!l; $("#licDetach").hidden = !l;
+  const kv = (k, v) => { const r = document.createElement("div"); r.className = "kv"; const a = document.createElement("span"); a.textContent = k; r.append(a, v); box.append(r); };
+  if (!l) { const p = document.createElement("div"); p.className = "hint"; p.textContent = "Mit deinem Konto ist noch kein Lizenzkey verknüpft."; box.append(p); return; }
+  const tag = document.createElement("span"); tag.className = "tag " + (l.status === "aktiv" ? "ok" : l.status === "gesperrt" ? "err" : "warn"); tag.textContent = l.status;
+  const code = document.createElement("code"); code.className = "key-code"; code.textContent = l.key; code.title = "Klicken zum Kopieren"; code.onclick = () => copyText(l.key);
+  const ex = document.createElement("b"); ex.textContent = l.expires_at ? dt(l.expires_at) : "Lifetime";
+  kv("Status", tag); kv("Key", code); kv("Gültig bis", ex);
+}
+async function loadDl() {
+  try {
+    const d = await uapi("/api/download/info");
+    $("#dlMeta").textContent = d.available ? `${d.filename} · ${(d.size / 1024).toFixed(0)} KB · Stand ${dt(d.updated)}` : "Aktuell ist keine Datei verfügbar.";
+    $("#dlBtn").disabled = !d.available;
+  } catch (e) { $("#dlMeta").textContent = e.message; }
+}
+$("#dlBtn").addEventListener("click", async () => {
+  const b = $("#dlBtn"); busy(b, true, "Lade …");
+  try {
+    const res = await fetch(HOME + "/api/download/client", { headers: { Authorization: "Bearer " + utoken } });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Download fehlgeschlagen.");
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: "revolt optimizer.exe" });
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("Download gestartet ✔");
+  } catch (e) { toast(e instanceof TypeError ? "Server nicht erreichbar." : e.message); }
+  busy(b, false, "⬇\u00a0 revolt optimizer.exe herunterladen");
+});
+
+async function saveMe(body, okMsg) {
+  try { me = (await uapi("/api/me", { method: "PATCH", body })).user; renderMe(); toast(okMsg); return true; }
+  catch (e) { toast(e.message); return false; }
+}
+$("#profileForm").addEventListener("submit", async ev => {
+  ev.preventDefault(); const b = $("#pSave"); busy(b, true, "Speichere …");
+  await saveMe({ name: $("#pName").value, email: $("#pEmail").value, discord: $("#pDiscord").value }, "Profil gespeichert ✔");
+  busy(b, false, "Änderungen speichern");
+});
+function cropAvatar(file, size) {
+  return new Promise((ok, no) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const c = document.createElement("canvas"); c.width = c.height = size;
+      const s = Math.min(img.width, img.height);
+      c.getContext("2d").drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(u); ok(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); no(new Error("Bild konnte nicht gelesen werden.")); };
+    img.src = u;
+  });
+}
+$("#avFile").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  try { await saveMe({ avatar: await cropAvatar(f, 256) }, "Profilbild aktualisiert ✔"); } catch (e) { toast(e.message); }
+});
+$("#avRemove").onclick = () => saveMe({ avatar: "" }, "Profilbild entfernt");
+
+$("#pwForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if ($("#newPw").value !== $("#newPw2").value) return toast("Die neuen Passwörter stimmen nicht überein.");
+  try {
+    await uapi("/api/me/password", { method: "POST", body: { current: $("#curPw").value, new: $("#newPw").value } });
+    $("#pwForm").reset(); toast("Passwort geändert ✔");
+  } catch (e) { toast(e.message); }
+});
+$("#licForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  try { me = (await uapi("/api/me/license", { method: "POST", body: { key: $("#licKey").value } })).user; $("#licKey").value = ""; renderMe(); toast("Lizenz verknüpft ✔"); }
+  catch (e) { toast(e.message); }
+});
+$("#licDetach").onclick = async () => {
+  if (!(await showCustomConfirm("Der Lizenzkey wird von deinem Benutzerkonto getrennt.", {
+    title: "Lizenzverknüpfung lösen?", confirmText: "Key lösen"
+  }))) return;
+  try { me = (await uapi("/api/me/license", { method: "DELETE" })).user; renderMe(); toast("Key gelöst"); } catch (e) { toast(e.message); }
+};
+$("#delForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!(await showCustomConfirm("Dein Benutzerkonto wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.", {
+    title: "Konto endgültig löschen?", confirmText: "Konto löschen"
+  }))) return;
+  try { await uapi("/api/me", { method: "DELETE", body: { password: $("#delPw").value } }); $("#delPw").value = ""; userLogout("Dein Konto wurde gelöscht."); }
+  catch (e) { toast(e.message); }
+});
+
+/* ───────── Init: erst Kunden-Login, Admin-Zugang separat ───────── */
+(async function init() {
+  $("#url").value = local.get("boost_server") || HOME;
+  const ut = local.get("revolt_utoken") || session.get("revolt_utoken");
+  if (ut) { utoken = ut; try { await enterPortal(); return; } catch (e) { utoken = ""; } }
+  const adminTok = session.get("boost_token") || local.get("boost_token");
+  if (adminTok) { base = $("#url").value; token = adminTok; try { await showDash(); return; } catch (e) { token = ""; } }
+  if (VIEWS.every(v => $("#" + v).hidden)) showAuth();
+})();
+
+// Auto-Refresh every 25 seconds when page is visible
+setInterval(() => {
+  if (token && !document.hidden) {
+    const tasks = [loadList(), loadUsers()];
+    if (isSuperAdmin) tasks.push(loadAdmins());
+    Promise.all(tasks).catch(() => {});
+  }
+}, 25000);
+
+/* ───────── Snow Animation ───────── */
+(function () {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("#snow"), x = c.getContext("2d"), f = [];
+  let W, H;
+  const rs = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+  rs();
+  addEventListener("resize", rs);
+  for (let i = 0; i < 95; i++) {
+    f.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 2.2 + 0.6,
+      v: Math.random() * 0.75 + 0.3,
+      p: Math.random() * 6.28,
+      s: Math.random() * 0.5 + 0.2
+    });
+  }
+  (function tick() {
+    x.clearRect(0, 0, W, H);
+    for (const o of f) {
+      o.y += o.v;
+      o.p += 0.01;
+      o.x += Math.sin(o.p) * o.s;
+      if (o.y > H + 5) { o.y = -5; o.x = Math.random() * W; }
+      x.globalAlpha = 0.2 + o.r / 3.2 * 0.5;
+      x.fillStyle = "#fff";
+      x.beginPath();
+      x.arc(o.x, o.y, o.r, 0, 6.283);
+      x.fill();
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+
+/* Custom monochrome dropdowns for every site select. */
+const customSelectStates = new WeakMap();
+let openCustomSelectState = null;
+
+function syncCustomSelect(select) {
+  const state = customSelectStates.get(select);
+  if (!state) return;
+  const selectedIndex = select.selectedIndex;
+  const selected = select.options[selectedIndex];
+  state.trigger.querySelector(".custom-select-label").textContent = selected?.textContent.trim() || "Auswählen …";
+  state.options.forEach((button, index) => {
+    const isSelected = index === selectedIndex;
+    button.setAttribute("aria-selected", String(isSelected));
+    button.classList.toggle("is-active", state.open && index === state.activeIndex);
+  });
+}
+
+(function initCustomSelects() {
+  const closeCustomSelect = state => {
+    if (!state) return;
+    state.open = false;
+    state.menu.hidden = true;
+    state.trigger.setAttribute("aria-expanded", "false");
+    state.trigger.removeAttribute("aria-activedescendant");
+    state.options.forEach(button => button.classList.remove("is-active"));
+    if (openCustomSelectState === state) openCustomSelectState = null;
+  };
+  const closeAll = () => closeCustomSelect(openCustomSelectState);
+  const setActive = (state, requested) => {
+    const enabled = state.options.map((button, index) => button.disabled ? -1 : index).filter(index => index >= 0);
+    if (!enabled.length) return;
+    const index = enabled.reduce((best, item) => Math.abs(item - requested) < Math.abs(best - requested) ? item : best, enabled[0]);
+    state.activeIndex = index;
+    state.options.forEach((button, i) => button.classList.toggle("is-active", i === index));
+    state.trigger.setAttribute("aria-activedescendant", state.options[index].id);
+    state.options[index].scrollIntoView({ block: "nearest" });
+  };
+  const openCustomSelect = (state, startAt = state.select.selectedIndex) => {
+    if (state.select.disabled || !state.options.length) return;
+    if (openCustomSelectState && openCustomSelectState !== state) closeCustomSelect(openCustomSelectState);
+    state.open = true;
+    openCustomSelectState = state;
+    state.menu.hidden = false;
+    state.trigger.setAttribute("aria-expanded", "true");
+    const rect = state.trigger.getBoundingClientRect();
+    const width = Math.min(innerWidth - 16, Math.max(Math.min(180, innerWidth - 16), rect.width));
+    const left = Math.max(8, Math.min(rect.left, innerWidth - width - 8));
+    const below = Math.max(90, innerHeight - rect.bottom - 16);
+    const above = Math.max(90, rect.top - 16);
+    const opensAbove = below < 190 && above > below;
+    const maxHeight = Math.min(320, opensAbove ? above : below);
+    state.menu.style.width = `${width}px`;
+    state.menu.style.left = `${left}px`;
+    state.menu.style.maxHeight = `${maxHeight}px`;
+    const actualHeight = Math.min(state.menu.scrollHeight, maxHeight);
+    state.menu.style.top = opensAbove
+      ? `${Math.max(8, rect.top - actualHeight - 6)}px`
+      : `${Math.min(innerHeight - actualHeight - 8, rect.bottom + 6)}px`;
+    setActive(state, startAt);
+  };
+  const choose = (state, index) => {
+    const option = state.select.options[index];
+    if (!option || option.disabled) return;
+    const changed = state.select.value !== option.value;
+    state.select.value = option.value;
+    syncCustomSelect(state.select);
+    closeCustomSelect(state);
+    if (changed) {
+      state.select.dispatchEvent(new Event("input", { bubbles: true }));
+      state.select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    state.trigger.focus();
+  };
+
+  document.querySelectorAll("select:not([multiple])").forEach((select, selectIndex) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = `custom-select${select.style.width === "100%" ? " is-full" : ""}`;
+    select.parentNode.insertBefore(wrapper, select);
+    wrapper.append(select);
+    select.classList.add("custom-select-native");
+    select.tabIndex = -1;
+    select.setAttribute("aria-hidden", "true");
+
+    const label = [...document.querySelectorAll("label[for]")].find(item => item.htmlFor === select.id);
+    const name = select.getAttribute("aria-label") || label?.textContent.trim() || select.title || select.id || "Auswahl";
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "custom-select-trigger";
+    trigger.id = `${select.id || `custom-select-${selectIndex}`}-trigger`;
+    trigger.setAttribute("role", "combobox");
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-label", name);
+    const labelText = document.createElement("span");
+    labelText.className = "custom-select-label";
+    trigger.append(labelText);
+    wrapper.append(trigger);
+
+    const menu = document.createElement("div");
+    menu.className = "custom-select-menu";
+    menu.id = `${trigger.id}-menu`;
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", name);
+    menu.hidden = true;
+    trigger.setAttribute("aria-controls", menu.id);
+    const state = { select, wrapper, trigger, menu, options: [], activeIndex: select.selectedIndex, open: false, search: "", searchTimer: 0 };
+    [...select.options].forEach((option, index) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "custom-select-option";
+      item.id = `${trigger.id}-option-${index}`;
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", "false");
+      item.textContent = option.textContent.trim();
+      item.disabled = option.disabled;
+      item.tabIndex = -1;
+      item.addEventListener("pointerenter", () => setActive(state, index));
+      item.addEventListener("click", () => choose(state, index));
+      menu.append(item);
+      state.options.push(item);
+    });
+    document.body.append(menu);
+    customSelectStates.set(select, state);
+    syncCustomSelect(select);
+
+    trigger.addEventListener("click", () => state.open ? closeCustomSelect(state) : openCustomSelect(state));
+    trigger.addEventListener("keydown", event => {
+      const enabled = state.options.map((button, index) => button.disabled ? -1 : index).filter(index => index >= 0);
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        if (!state.open) openCustomSelect(state, select.selectedIndex);
+        else {
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          const current = enabled.indexOf(state.activeIndex);
+          setActive(state, enabled[(current + direction + enabled.length) % enabled.length]);
+        }
+      } else if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        if (!state.open) openCustomSelect(state);
+        setActive(state, event.key === "Home" ? enabled[0] : enabled[enabled.length - 1]);
+      } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (state.open) choose(state, state.activeIndex);
+        else openCustomSelect(state);
+      } else if (event.key === "Escape" && state.open) {
+        event.preventDefault();
+        closeCustomSelect(state);
+      } else if (event.key === "Tab") {
+        closeCustomSelect(state);
+      } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        state.search += event.key.toLocaleLowerCase();
+        clearTimeout(state.searchTimer);
+        state.searchTimer = setTimeout(() => state.search = "", 700);
+        const match = state.options.findIndex((button, index) => !button.disabled && button.textContent.toLocaleLowerCase().startsWith(state.search));
+        if (match >= 0) {
+          if (!state.open) openCustomSelect(state, match);
+          else setActive(state, match);
+        }
+      }
+    });
+    select.addEventListener("change", () => syncCustomSelect(select));
+    select.form?.addEventListener("reset", () => setTimeout(() => syncCustomSelect(select), 0));
+    if (label) label.addEventListener("click", event => { event.preventDefault(); trigger.focus(); });
+  });
+
+  document.addEventListener("pointerdown", event => {
+    const state = openCustomSelectState;
+    if (state && !state.wrapper.contains(event.target) && !state.menu.contains(event.target)) closeCustomSelect(state);
+  });
+  document.addEventListener("scroll", event => {
+    if (openCustomSelectState && event.target !== openCustomSelectState.menu) closeCustomSelect(openCustomSelectState);
+  }, true);
+  addEventListener("resize", closeAll);
+})();
+</script>
+</body>
+</html>
