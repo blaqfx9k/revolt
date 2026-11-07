@@ -658,12 +658,12 @@ html{scroll-behavior:smooth}
     <section class="hero-dl">
       <div class="l"><div class="dl-icon">⬇</div>
         <div><h2>Client herunterladen</h2><p id="dlMeta">Lade Informationen …</p></div></div>
-      <button class="big" id="dlBtn" disabled>⬇&nbsp; revolt.py herunterladen</button>
+      <button class="big" id="dlBtn" disabled>⬇&nbsp; revolt optimizer herunterladen</button>
     </section>
 
     <section class="steps">
       <div class="step"><b><em>1</em>Python installieren</b>Version 3.10 oder neuer von python.org – setze den Haken bei „Add Python to PATH“.</div>
-      <div class="step"><b><em>2</em>Datei starten</b>Doppelklick auf <code>revolt.py</code> oder <code>python revolt.py</code>. Fehlende Pakete werden automatisch installiert.</div>
+      <div class="step"><b><em>2</em>Datei starten</b>Doppelklick auf <code>revolt.exe</code> oder <code>python revolt optimizer.exe</code>. Fehlende Pakete werden automatisch installiert.</div>
       <div class="step"><b><em>3</em>Key aktivieren</b>Gib deinen Lizenzkey im Programm ein und optimiere dein FiveM mit maximalen FPS.</div>
     </section>
   </div>
@@ -689,9 +689,12 @@ html{scroll-behavior:smooth}
           <div class="field"><label for="pEmail">E-Mail</label><input id="pEmail" type="email" required></div>
           <div class="field"><label for="pDiscord">Discord (optional)</label><input id="pDiscord" maxlength="40" placeholder="benutzername"></div>
           <button id="pSave">Änderungen speichern</button>
-        </form>
-        <div class="kv" style="margin-top:20px"><span>Mitglied seit</span><b id="pSince">–</b></div>
-        <div class="kv"><span>Letzter Login</span><b id="pLast">–</b></div>
+        </form>
+
+        <div class="kv" style="margin-top:20px"><span>Mitglied seit</span><b id="pSince">–</b></div>
+
+        <div class="kv"><span>Letzter Login</span><b id="pLast">–</b></div>
+
       </section>
 
       <div>
@@ -1960,11 +1963,11 @@ $("#dlBtn").addEventListener("click", async () => {
     const res = await fetch(HOME + "/api/download/client", { headers: { Authorization: "Bearer " + utoken } });
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Download fehlgeschlagen.");
     const url = URL.createObjectURL(await res.blob());
-    const a = Object.assign(document.createElement("a"), { href: url, download: "revolt.py" });
+    const a = Object.assign(document.createElement("a"), { href: url, download: "revolt optimizer.exe" });
     document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast("Download gestartet ✔");
   } catch (e) { toast(e instanceof TypeError ? "Server nicht erreichbar." : e.message); }
-  busy(b, false, "⬇\u00a0 revolt.py herunterladen");
+  busy(b, false, "⬇\u00a0 revolt optimizer.exe herunterladen");
 });
 
 async function saveMe(body, okMsg) {
