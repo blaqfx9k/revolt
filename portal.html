@@ -1,0 +1,1707 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>REVOLT OPTIMIZER · Kundenportal</title>
+<style>
+:root {
+  --bg: #000000;
+  --card: #0a0a0a;
+  --card-hover: #111111;
+  --row: #0e0e0e;
+  --row-hover: #161616;
+  --line: #222222;
+  --line-light: #333333;
+  --fg: #ffffff;
+  --muted: #8e8e8e;
+  --accent: #ffffff;
+  --ok: #22c55e;
+  --ok-bg: rgba(34, 197, 94, 0.12);
+  --warn: #eab308;
+  --warn-bg: rgba(234, 179, 8, 0.12);
+  --err: #ef4444;
+  --err-bg: rgba(239, 68, 68, 0.12);
+  --bound: #3b82f6;
+  --bound-bg: rgba(59, 130, 246, 0.12);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+canvas#snow {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+/* ───────── Typography & Header ───────── */
+h1 { font-size: 24px; letter-spacing: 0.2em; margin: 0; font-weight: 800; }
+.sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.top .brand { display: flex; align-items: center; gap: 14px; }
+.top .badge-admin {
+  background: #1a1a1a;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.top .actions-header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 10px var(--ok);
+  margin-right: 6px;
+}
+.server-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 15, 15, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.server-pill b { color: var(--fg); margin-left: 4px; font-weight: 600; }
+
+/* ───────── Stats Grid ───────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat {
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.stat:hover { border-color: var(--line-light); transform: translateY(-2px); }
+.stat b { display: block; font-size: 28px; margin-bottom: 2px; font-weight: 800; letter-spacing: -0.02em; }
+.stat span { color: var(--muted); font-size: 12px; font-weight: 500; }
+.stat.green b { color: var(--ok); }
+.stat.amber b { color: var(--warn); }
+.stat.red b { color: var(--err); }
+.stat.blue b { color: var(--bound); }
+
+/* ───────── Cards & Sections ───────── */
+.card {
+  background: rgba(10, 10, 10, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+.card h2 {
+  font-size: 13px;
+  margin: 0 0 16px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--fg);
+  text-transform: uppercase;
+}
+.card h2 small { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: normal; text-transform: none; }
+
+/* ───────── Forms & Controls ───────── */
+input, select, textarea {
+  background: #000;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+label { display: block; color: var(--muted); font-size: 12px; margin: 0 0 6px; font-weight: 500; }
+
+button {
+  background: #ffffff;
+  color: #000000;
+  border: 0;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+button:hover { background: #e5e5e5; transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+button.ghost {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid var(--line);
+}
+button.ghost:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+button.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+button.danger:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+button.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+button.success:hover {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: #22c55e;
+}
+button.sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; font-weight: 600; }
+button.icon-btn { padding: 6px 9px; font-size: 13px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1; min-width: 180px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+/* ───────── Login Screen ───────── */
+.login { max-width: 440px; margin: 0 auto; padding-top: 9vh; }
+.login .card { display: grid; gap: 14px; padding: 28px; }
+.preset-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.preset-pill {
+  background: #111;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.preset-pill:hover { color: #fff; border-color: #fff; }
+.err {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.hint { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+/* ───────── Table & Badges ───────── */
+.tablewrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  margin-top: 14px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+th {
+  background: #080808;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  background: var(--card);
+}
+tr:last-child td { border-bottom: 0; }
+tr:hover td { background: var(--row-hover); }
+
+code.key-code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  background: #000;
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+}
+code.key-code:hover { border-color: #fff; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tag.ok { color: var(--ok); border-color: rgba(34, 197, 94, 0.3); background: var(--ok-bg); }
+.tag.warn { color: var(--warn); border-color: rgba(234, 179, 8, 0.3); background: var(--warn-bg); }
+.tag.err { color: var(--err); border-color: rgba(239, 68, 68, 0.3); background: var(--err-bg); }
+.tag.bound { color: var(--bound); border-color: rgba(59, 130, 246, 0.3); background: var(--bound-bg); }
+
+.user-cell { display: flex; flex-direction: column; gap: 2px; }
+.user-name { font-weight: 600; color: #fff; }
+.user-note { color: var(--muted); font-size: 11px; }
+
+.actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+
+/* ───────── New Keys Banner ───────── */
+.newkeys { border-color: #fff; background: rgba(14, 14, 14, 0.98); }
+.keyline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.keyline:last-of-type { border-bottom: 0; }
+.keyline code { font-size: 16px; flex: 1; font-weight: 700; color: #fff; letter-spacing: 0.06em; }
+.key-details { font-size: 12px; color: var(--muted); }
+
+/* ───────── Modals ───────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: #0d0d0d;
+  border: 1px solid var(--line-light);
+  border-radius: 18px;
+  max-width: 500px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: modalIn 0.15s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.modal-header h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.05em; }
+.modal-body { display: grid; gap: 14px; margin-bottom: 22px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ───────── Toast ───────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%) translateY(20px);
+  background: #ffffff;
+  color: #000000;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0;
+  transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 200;
+  pointer-events: none;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.empty { color: var(--muted); text-align: center; padding: 36px 12px; font-size: 13px; }
+
+/* ───────── Responsive ───────── */
+@media(max-width: 768px) {
+  .wrap { padding: 20px 14px 60px; }
+  h1 { font-size: 20px; }
+  .actions { flex-direction: column; gap: 4px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+/* ═════════ Kundenportal ═════════ */
+.auth-shell{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:56px;max-width:1100px;margin:0 auto;padding:40px 24px}
+.auth-hero h1{font-size:38px;letter-spacing:.14em;line-height:1.15;margin:0 0 16px}
+.auth-hero p{color:var(--muted);font-size:15px;line-height:1.65;max-width:440px;margin:0 0 28px}
+.feat{display:grid;gap:16px}
+.feat div{display:flex;gap:14px;align-items:flex-start;color:var(--muted);font-size:13px;line-height:1.5}
+.feat b{color:#fff;font-size:14px}
+.feat i{font-style:normal;width:34px;height:34px;border:1px solid var(--line-light);border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.04)}
+.auth-card{background:rgba(10,10,10,.93);border:1px solid var(--line-light);border-radius:22px;padding:32px;box-shadow:0 40px 90px rgba(0,0,0,.65)}
+.auth-card h2{margin:0 0 4px;font-size:20px;letter-spacing:0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#000;border:1px solid var(--line);border-radius:12px;padding:4px;margin:18px 0 22px}
+.tabs button{background:transparent;color:var(--muted);padding:10px;border-radius:9px;font-weight:600}
+.tabs button:hover{background:transparent;color:#fff;transform:none}
+.tabs button.on{background:#fff;color:#000}
+.field{margin-bottom:15px}.field input{width:100%}
+.pwwrap{position:relative}.pwwrap input{padding-right:84px}
+.pwwrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:5px 10px;font-size:11px}
+.pwwrap .eye:hover{transform:translateY(-50%)}
+.meter{height:4px;background:var(--line);border-radius:4px;margin-top:9px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;transition:width .25s,background .25s}
+.meter-l{font-size:11px;color:var(--muted);margin-top:5px;min-height:14px}
+.chk{display:flex;gap:9px;align-items:center;color:var(--muted);font-size:13px;margin:2px 0 18px;cursor:pointer}
+.chk input{width:16px;height:16px;padding:0;accent-color:#fff}
+.btn-full{width:100%;padding:13px;font-size:14px}
+.auth-foot{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+.auth-foot a,.link{color:#fff;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.portal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+.userchip{display:flex;align-items:center;gap:10px;background:rgba(10,10,10,.9);border:1px solid var(--line);border-radius:999px;padding:4px 16px 4px 4px;font-size:13px;font-weight:600}
+.av{border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-weight:800;overflow:hidden;flex:none;width:34px;height:34px}
+.av img{width:100%;height:100%;object-fit:cover}
+.hero-dl{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(135deg,#171717,#080808 70%);border:1px solid var(--line-light);border-radius:22px;padding:26px 30px;margin-bottom:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.hero-dl .l{display:flex;gap:18px;align-items:center}
+.dl-icon{width:58px;height:58px;border-radius:16px;background:#fff;color:#000;display:grid;place-items:center;font-size:26px;font-weight:800}
+.hero-dl h2{margin:0 0 4px;font-size:20px;letter-spacing:0}
+.hero-dl p{margin:0;color:var(--muted);font-size:13px}
+.big{padding:15px 28px;font-size:15px;border-radius:12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.step{background:rgba(10,10,10,.9);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.step b{display:block;color:#fff;font-size:13.5px;margin-bottom:4px}
+.step em{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#000;font-size:11px;font-weight:800;margin-right:8px}
+.step code{background:#000;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#fff;font-size:12px}
+.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start}
+.avatar-row{display:flex;gap:20px;align-items:center;margin-bottom:22px}
+.av.big{width:88px;height:88px;font-size:32px;border:2px solid var(--line-light)}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}.kv span{color:var(--muted)}
+.danger-zone{border-color:rgba(239,68,68,.35)}
+@media(max-width:860px){.auth-shell{grid-template-columns:1fr;gap:28px;padding-top:28px}.auth-hero h1{font-size:28px}.feat{display:none}.steps,.grid2{grid-template-columns:1fr}.hero-dl{padding:22px}}
+
+/* ───────── Portal Tabs Navigation ───────── */
+.portal-nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.portal-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.portal-tab-btn:hover {
+  color: var(--fg);
+  background: var(--card);
+}
+.portal-tab-btn.active {
+  color: var(--fg);
+  border-bottom-color: #ffffff;
+  background: var(--card);
+}
+.portal-tab-btn.buy-tab {
+  color: #5865F2;
+  border: 1px solid rgba(88, 101, 242, 0.35);
+  border-radius: 8px;
+  margin-left: auto;
+  background: rgba(88, 101, 242, 0.08);
+}
+.portal-tab-btn.buy-tab:hover {
+  background: rgba(88, 101, 242, 0.22);
+  border-color: #5865F2;
+  color: #ffffff;
+}
+
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+
+<!-- ═════════════════════════ KUNDENPORTAL: ANMELDEN / REGISTRIEREN ═════════════════════════ -->
+<main id="authView" class="auth-shell" hidden>
+  <section class="auth-hero">
+    <h1>REVOLT<br><span style="color:var(--muted)">OPTIMIZER</span></h1>
+    <p>Dein Kundenportal: Konto erstellen, den Client herunterladen und Profil sowie Lizenz an einem Ort verwalten.</p>
+    <div class="feat">
+      <div><i>⚡</i><span><b>Mehr FPS in FiveM</b><br>Cache, Netzwerk, CPU &amp; GPU – mit einem Klick optimiert.</span></div>
+      <div><i>🔐</i><span><b>Sichere Lizenzierung</b><br>Dein Key ist an dein Konto und deinen PC gebunden.</span></div>
+      <div><i>⬇</i><span><b>Immer aktuell</b><br>Lade die neueste Version direkt hier herunter.</span></div>
+    </div>
+  </section>
+
+  <section class="auth-card">
+    <h2 id="authTitle">Willkommen zurück</h2>
+    <div class="sub" id="authSub">Melde dich an, um fortzufahren.</div>
+    <div class="tabs">
+      <button type="button" id="tabLogin" class="on">Anmelden</button>
+      <button type="button" id="tabReg">Registrieren</button>
+    </div>
+    <div id="authErr" class="err" hidden style="margin-bottom:16px"></div>
+
+    <form id="userLoginForm" novalidate>
+      <div class="field"><label for="uEmail">E-Mail</label><input id="uEmail" type="email" autocomplete="email" placeholder="du@beispiel.de" required></div>
+      <div class="field"><label for="uPw">Passwort</label>
+        <div class="pwwrap"><input id="uPw" type="password" autocomplete="current-password" placeholder="Dein Passwort" required><button type="button" class="ghost sm eye" data-for="uPw">Zeigen</button></div></div>
+      <label class="chk"><input type="checkbox" id="uRemember" checked> Angemeldet bleiben</label>
+      <button class="btn-full" id="ulBtn">Anmelden</button>
+    </form>
+
+    <form id="regForm" hidden novalidate>
+      <div class="field"><label for="rName">Name</label><input id="rName" autocomplete="name" placeholder="Dein Name" maxlength="40" required></div>
+      <div class="field"><label for="rEmail">E-Mail</label><input id="rEmail" type="email" autocomplete="email" placeholder="du@beispiel.de" required></div>
+      <div class="field"><label for="rPw">Passwort</label>
+        <div class="pwwrap"><input id="rPw" type="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" required><button type="button" class="ghost sm eye" data-for="rPw">Zeigen</button></div>
+        <div class="meter"><i id="meterBar"></i></div><div class="meter-l" id="meterLbl"></div></div>
+      <div class="field"><label for="rPw2">Passwort wiederholen</label><input id="rPw2" type="password" autocomplete="new-password" placeholder="Passwort bestätigen" required></div>
+      <button class="btn-full" id="rgBtn">Konto erstellen</button>
+    </form>
+
+    <div class="auth-foot">Du bist Admin? <a id="toAdmin">Zum Admin-Zugang</a></div>
+  </section>
+</main>
+
+<!-- ═════════════════════════ KUNDENPORTAL: MEIN KONTO ═════════════════════════ -->
+<main id="portalView" class="wrap" hidden>
+  <header class="portal-top">
+    <div><h1>REVOLT OPTIMIZER</h1><div class="sub">Kundenportal</div></div>
+    <div class="row" style="gap:10px">
+      <div class="userchip"><div class="av" id="avChip"></div><span id="chipName"></span></div>
+      <button class="ghost sm" id="uLogout">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- ───────── Navigation Tabs ───────── -->
+  <nav class="portal-nav-tabs">
+    <button type="button" class="portal-tab-btn active" data-tab="home" onclick="switchPortalTab('home')">🏠 Home</button>
+    <button type="button" class="portal-tab-btn" data-tab="download" onclick="switchPortalTab('download')">⬇️ Download</button>
+    <button type="button" class="portal-tab-btn" data-tab="profile" onclick="switchPortalTab('profile')">👤 Profil</button>
+    <a href="https://discord.gg/revolt-optimizer" target="_blank" rel="noopener noreferrer" class="portal-tab-btn buy-tab">🛒 Kaufen <span style="font-size:11px; opacity:0.7">↗</span></a>
+  </nav>
+
+  <!-- ───────── TAB 1: HOME ───────── -->
+  <div id="tab-home" class="portal-tab-pane">
+    <div class="card" style="margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div class="av big" id="homeAvBig"></div>
+        <div>
+          <h2 style="margin:0; font-size:20px; letter-spacing:0.02em;">Willkommen zurück, <span id="homeWelcomeName">User</span>! 👋</h2>
+          <div class="sub" style="margin-top:4px;">Dein persönlicher REVOLT FiveM Optimizer Bereich</div>
+        </div>
+      </div>
+      <div class="row" style="gap:10px;">
+        <button class="sm" onclick="switchPortalTab('download')">⬇️ Zum Download</button>
+        <a href="https://discord.gg/revolt-optimizer" target="_blank" rel="noopener" class="ghost sm" style="text-decoration:none; display:inline-flex; align-items:center;">Discord Server</a>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <!-- Benutzer Information -->
+      <section class="card">
+        <h2>BENUTZER-INFORMATIONEN</h2>
+        <div class="kv"><span>Name</span><b id="homeName">–</b></div>
+        <div class="kv"><span>E-Mail</span><b id="homeEmail">–</b></div>
+        <div class="kv"><span>Discord</span><b id="homeDiscord">–</b></div>
+        <div class="kv"><span>Mitglied seit</span><b id="homeSince">–</b></div>
+        <div class="kv"><span>Letzter Login</span><b id="homeLast">–</b></div>
+        <div style="margin-top:20px;">
+          <button class="ghost sm" onclick="switchPortalTab('profile')">✏️ Profil bearbeiten</button>
+        </div>
+      </section>
+
+      <!-- Lizenz Übersicht -->
+      <section class="card">
+        <h2>LIZENZ-STATUS</h2>
+        <div id="licInfo"></div>
+        <form id="licForm" style="margin-top:14px" novalidate>
+          <label for="licKey">Lizenzkey verknüpfen</label>
+          <div class="row" style="gap:8px"><input id="licKey" class="grow" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" style="text-transform:uppercase"><button>Verknüpfen</button></div>
+        </form>
+        <button class="ghost sm" id="licDetach" style="margin-top:12px" hidden>Key vom Konto lösen</button>
+      </section>
+    </div>
+  </div>
+
+  <!-- ───────── TAB 2: DOWNLOAD ───────── -->
+  <div id="tab-download" class="portal-tab-pane" hidden>
+    <section class="hero-dl">
+      <div class="l"><div class="dl-icon">⬇</div>
+        <div><h2>Client herunterladen</h2><p id="dlMeta">Lade Informationen …</p></div></div>
+      <button class="big" id="dlBtn" disabled>⬇&nbsp; revolt.py herunterladen</button>
+    </section>
+
+    <section class="steps">
+      <div class="step"><b><em>1</em>Python installieren</b>Version 3.10 oder neuer von python.org – setze den Haken bei „Add Python to PATH“.</div>
+      <div class="step"><b><em>2</em>Datei starten</b>Doppelklick auf <code>revolt.py</code> oder <code>python revolt.py</code>. Fehlende Pakete werden automatisch installiert.</div>
+      <div class="step"><b><em>3</em>Key aktivieren</b>Gib deinen Lizenzkey im Programm ein und optimiere dein FiveM mit maximalen FPS.</div>
+    </section>
+  </div>
+
+  <!-- ───────── TAB 3: PROFIL ───────── -->
+  <div id="tab-profile" class="portal-tab-pane" hidden>
+    <div class="grid2">
+      <section class="card">
+        <h2>PROFIL VERWALTEN</h2>
+        <div class="avatar-row">
+          <div class="av big" id="avBig"></div>
+          <div>
+            <div class="row" style="gap:8px">
+              <button type="button" class="sm" onclick="$('#avFile').click()">Bild hochladen</button>
+              <button type="button" class="ghost sm" id="avRemove">Entfernen</button>
+            </div>
+            <div class="hint" style="margin-top:8px">JPG, PNG oder WebP – wird automatisch auf 256 × 256 zugeschnitten.</div>
+            <input type="file" id="avFile" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
+        </div>
+        <form id="profileForm" novalidate>
+          <div class="field"><label for="pName">Name</label><input id="pName" maxlength="40" required></div>
+          <div class="field"><label for="pEmail">E-Mail</label><input id="pEmail" type="email" required></div>
+          <div class="field"><label for="pDiscord">Discord (optional)</label><input id="pDiscord" maxlength="40" placeholder="benutzername"></div>
+          <button id="pSave">Änderungen speichern</button>
+        </form>
+        <div class="kv" style="margin-top:20px"><span>Mitglied seit</span><b id="pSince">–</b></div>
+        <div class="kv"><span>Letzter Login</span><b id="pLast">–</b></div>
+      </section>
+
+      <div>
+        <section class="card">
+          <h2>SICHERHEIT (PASSWORT ÄNDERN)</h2>
+          <form id="pwForm" novalidate>
+            <div class="field"><label for="curPw">Aktuelles Passwort</label><input id="curPw" type="password" autocomplete="current-password"></div>
+            <div class="field"><label for="newPw">Neues Passwort</label><input id="newPw" type="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen"></div>
+            <div class="field"><label for="newPw2">Neues Passwort wiederholen</label><input id="newPw2" type="password" autocomplete="new-password"></div>
+            <button class="ghost">Passwort ändern</button>
+          </form>
+        </section>
+
+        <section class="card danger-zone">
+          <h2 style="color:var(--err)">KONTO LÖSCHEN</h2>
+          <div class="hint" style="margin-bottom:12px">Dein Konto wird dauerhaft gelöscht. Dein Lizenzkey bleibt bestehen, wird aber vom Konto gelöst.</div>
+          <form id="delForm" class="row" style="gap:8px" novalidate>
+            <input id="delPw" type="password" class="grow" placeholder="Passwort zur Bestätigung" autocomplete="current-password">
+            <button class="danger">Löschen</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═════════════════════════ ADMIN-LOGIN ═════════════════════════ -->
+<main id="loginView" class="wrap login" hidden>
+  <div class="brand" style="margin-bottom: 6px;">
+    <h1>REVOLT OPTIMIZER</h1>
+    <div class="sub">Lizenz- & Benutzerverwaltung</div>
+  </div>
+
+  <form id="loginForm" class="card" autocomplete="off">
+    <div id="loginErr" class="err" hidden></div>
+
+    <div>
+      <label for="url">Lizenzserver-Adresse</label>
+      <input id="url" style="width:100%" placeholder="http://localhost:5050" required>
+      <div class="preset-buttons">
+        <span class="preset-pill" onclick="setServerPreset('http://localhost:5050')">localhost:5050</span>
+        <span class="preset-pill" onclick="setServerPreset('http://127.0.0.1:5050')">127.0.0.1:5050</span>
+      </div>
+    </div>
+
+    <div>
+      <label for="user">Admin-Benutzer</label>
+      <input id="user" style="width:100%" value="admin" required>
+    </div>
+
+    <div>
+      <label for="pw">Admin-Passwort</label>
+      <input id="pw" type="password" style="width:100%" placeholder="Dein Server-Passwort" required autofocus>
+    </div>
+
+    <button id="loginBtn" style="margin-top: 6px;">🔑 Anmelden</button>
+    <div class="hint" style="text-align:center"><a class="link" id="backPortal">← Zurück zum Kundenportal</a></div>
+
+    <div class="hint">
+      <b>Tipp:</b> Starte deinen Lizenzserver vorher im Terminal mit:<br>
+      <code>python fivem_boost.py server</code>
+    </div>
+  </form>
+</main>
+
+<!-- ═════════════════════════ DASHBOARD ═════════════════════════ -->
+<main id="dashView" class="wrap" hidden>
+  <header class="top">
+    <div class="brand">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1>REVOLT OPTIMIZER</h1>
+          <span class="badge-admin">Admin</span>
+        </div>
+        <div class="sub">Benutzer- & Lizenzverwaltung</div>
+      </div>
+    </div>
+
+    <div class="actions-header">
+      <div class="server-pill">
+        <span class="status-dot"></span>
+        <span id="hostLabel">localhost:5050</span>
+      </div>
+      <button class="ghost sm" id="refreshBtn" title="Aktualisieren">⟳ Aktualisieren</button>
+      <button class="ghost sm" id="exportBtn" title="Lizenzen als CSV exportieren">📥 Export (CSV)</button>
+      <button class="ghost sm" id="logoutBtn" title="Abmelden">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- ───── Stats ───── -->
+  <section class="stats">
+    <div class="stat"><b id="sTotal">0</b><span>Keys gesamt</span></div>
+    <div class="stat green"><b id="sActive">0</b><span>Aktive Benutzer</span></div>
+    <div class="stat blue"><b id="sBound">0</b><span>PCs verbunden</span></div>
+    <div class="stat amber"><b id="sExpired">0</b><span>Abgelaufen</span></div>
+    <div class="stat red"><b id="sRevoked">0</b><span>Gesperrt</span></div>
+    <div class="stat"><b id="sToday">0</b><span>Heute online</span></div>
+  </section>
+
+  <!-- ───── Create Keys ───── -->
+  <section class="card">
+    <h2>
+      <span>➕ Lizenzen & Benutzer erstellen</span>
+      <small>Generiert 16-stellige Keys für REVOLT OPTIMIZER</small>
+    </h2>
+    <form id="createForm" class="form-grid">
+      <div class="grow" style="grid-column: span 2;">
+        <label for="note">Benutzername / Kunde / Notiz</label>
+        <input id="note" style="width: 100%" placeholder="z. B. Discord: Max#0001, Kunde Peter, Shop-Kauf..." maxlength="100">
+      </div>
+
+      <div>
+        <label for="days">Gültigkeit / Laufzeit</label>
+        <select id="days" style="width: 100%">
+          <option value="1">1 Tag (Test-Lizenz)</option>
+          <option value="3">3 Tage</option>
+          <option value="7">7 Tage (1 Woche)</option>
+          <option value="14">14 Tage (2 Wochen)</option>
+          <option value="30" selected>30 Tage (1 Monat)</option>
+          <option value="60">60 Tage (2 Monate)</option>
+          <option value="90">90 Tage (3 Monate)</option>
+          <option value="180">180 Tage (6 Monate)</option>
+          <option value="365">365 Tage (1 Jahr)</option>
+          <option value="0">Lifetime (Dauerhaft)</option>
+          <option value="custom">Benutzerdefiniert...</option>
+        </select>
+      </div>
+
+      <div id="customDaysBox" hidden>
+        <label for="customDays">Tage</label>
+        <input id="customDays" type="number" min="1" max="3650" value="45" style="width: 100%">
+      </div>
+
+      <div style="max-width: 110px;">
+        <label for="count">Anzahl</label>
+        <input id="count" type="number" min="1" max="50" value="1" style="width: 100%">
+      </div>
+
+      <div>
+        <label for="customKey">Wunsch-Key (optional)</label>
+        <input id="customKey" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" style="width: 100%; text-transform: uppercase;">
+      </div>
+
+      <div>
+        <button id="createBtn" style="width: 100%">🚀 Lizenz erstellen</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ───── Newly Created Keys Box ───── -->
+  <section id="newBox" class="card newkeys" hidden>
+    <h2>
+      <span id="newTitle">✔ NEUE KEYS ERSTELLT</span>
+      <button class="ghost sm" id="newClose">✕ Schließen</button>
+    </h2>
+    <div id="newList"></div>
+    <div class="row" style="margin-top: 16px;">
+      <button id="copyAll">📋 Alle Keys kopieren</button>
+      <button class="ghost" id="copyDiscord">💬 Discord / Kunden-Nachricht kopieren</button>
+      <button class="ghost" id="downloadTxt">💾 Als .txt herunterladen</button>
+    </div>
+  </section>
+
+  <!-- ───── All Licenses / Users Table ───── -->
+  <section class="card">
+    <h2>
+      <span>👥 Alle Benutzer & Lizenzen (<span id="countFiltered">0</span>)</span>
+      <small>Klicke auf einen Key zum Kopieren</small>
+    </h2>
+
+    <div class="row" style="margin-bottom: 14px;">
+      <input id="q" class="grow" placeholder="🔍 Suchen nach Key, Benutzer / Notiz, HWID...">
+      
+      <select id="st">
+        <option value="">Alle Status</option>
+        <option value="aktiv">Nur Aktiv</option>
+        <option value="abgelaufen">Nur Abgelaufen</option>
+        <option value="gesperrt">Nur Gesperrt</option>
+      </select>
+
+      <select id="filterBound">
+        <option value="">Alle PCs</option>
+        <option value="gebunden">Gebunden (mit PC)</option>
+        <option value="frei">Frei (ohne PC)</option>
+      </select>
+
+      <select id="sortBy">
+        <option value="newest">Neueste zuerst</option>
+        <option value="oldest">Älteste zuerst</option>
+        <option value="seen">Zuletzt aktiv</option>
+        <option value="exp">Läuft bald ab</option>
+      </select>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Benutzer / Notiz</th>
+            <th>Status</th>
+            <th>Laufzeit / Ablauf</th>
+            <th>PC-Bindung</th>
+            <th>Zuletzt aktiv</th>
+            <th style="text-align: right;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+
+    <div id="empty" class="empty" hidden>Keine Lizenzen gefunden.</div>
+  </section>
+</main>
+
+<!-- ═════════════════════════ EDIT MODAL ═════════════════════════ -->
+<div id="editModal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ Benutzer & Lizenz bearbeiten</h3>
+      <button class="ghost sm icon-btn" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="editForm">
+      <div class="modal-body">
+        <div>
+          <label>Lizenzkey</label>
+          <div class="row">
+            <code id="editKey" class="key-code" style="flex: 1; padding: 10px;"></code>
+            <button type="button" class="ghost sm" id="editCopyKey">Kopieren</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="editNote">Benutzername / Notiz</label>
+          <input id="editNote" style="width: 100%" placeholder="Benutzername oder Kundeninfo">
+        </div>
+
+        <div>
+          <label for="editStatus">Status</label>
+          <select id="editStatus" style="width: 100%">
+            <option value="active">Aktiv (Freigegeben)</option>
+            <option value="revoked">Gesperrt / Gebannt</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="editExtend">Laufzeit anpassen</label>
+          <select id="editExtend" style="width: 100%">
+            <option value="keep" selected>Unverändert lassen</option>
+            <option value="7">+ 7 Tage verlängern</option>
+            <option value="30">+ 30 Tage verlängern</option>
+            <option value="90">+ 90 Tage verlängern</option>
+            <option value="365">+ 1 Jahr verlängern</option>
+            <option value="lifetime">Auf Lifetime (unbegrenzt) setzen</option>
+          </select>
+        </div>
+
+        <div>
+          <label>PC / Hardware-Bindung (HWID)</label>
+          <div id="editHwidText" style="font-size: 12px; color: var(--muted); margin-bottom: 8px;"></div>
+          <button type="button" class="ghost sm" id="editResetHwidBtn">💻 PC-Bindung aufheben (HWID Reset)</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="ghost" onclick="closeEditModal()">Abbrechen</button>
+        <button type="submit">💾 Änderungen speichern</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ═════════════════════════ JAVASCRIPT ═════════════════════════ -->
+<script>
+"use strict";
+
+const $ = s => document.querySelector(s);
+const store = area => ({
+  get(k) { try { return window[area].getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { window[area].setItem(k, v); } catch (e) {} },
+  del(k) { try { window[area].removeItem(k); } catch (e) {} }
+});
+const local = store("localStorage"), session = store("sessionStorage");
+
+let base = "", token = "", licenses = [], currentEditLicense = null;
+let lastCreatedKeys = [], lastCreatedNote = "", lastCreatedDays = 30;
+
+function el(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c === null || c === undefined) continue;
+    n.append(typeof c === "object" ? c : String(c));
+  }
+  return n;
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast on";
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => t.className = "toast", 2200);
+}
+
+function fmt(ts) {
+  if (!ts) return "–";
+  return new Date(ts * 1000).toLocaleString("de-DE", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function fmtRelative(ts) {
+  if (!ts) return "Nie";
+  const diff = Math.floor(Date.now() / 1000) - ts;
+  if (diff < 60) return "Gerade eben";
+  if (diff < 3600) return `Vor ${Math.floor(diff / 60)} Min.`;
+  if (diff < 86400) return `Vor ${Math.floor(diff / 3600)} Std.`;
+  if (diff < 604800) return `Vor ${Math.floor(diff / 86400)} Tagen`;
+  return fmt(ts);
+}
+
+function fmtExp(exp) {
+  if (!exp) return { text: "Lifetime", badge: "Lifetime", isExp: false };
+  const now = Math.floor(Date.now() / 1000);
+  const diff = exp - now;
+  const dateStr = new Date(exp * 1000).toLocaleDateString("de-DE");
+  if (diff < 0) {
+    const ago = Math.abs(diff);
+    const daysAgo = Math.floor(ago / 86400);
+    return { text: dateStr, badge: `Abgelaufen (vor ${daysAgo}d)`, isExp: true };
+  }
+  const daysLeft = Math.ceil(diff / 86400);
+  return { text: dateStr, badge: `Noch ${daysLeft} ${daysLeft === 1 ? 'Tag' : 'Tage'}`, isExp: false };
+}
+
+function normUrl(u) {
+  u = u.trim().replace(/\/+$/, "");
+  return /^https?:\/\//i.test(u) ? u : "http://" + u;
+}
+
+function setServerPreset(url) {
+  $("#url").value = url;
+}
+
+async function copyText(s, customMsg = "Kopiert!") {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(s);
+    } else {
+      throw new Error("fallback");
+    }
+  } catch (e) {
+    const a = el("textarea");
+    a.value = s;
+    document.body.append(a);
+    a.select();
+    try {
+      document.execCommand("copy");
+    } catch (e2) {
+      toast("Kopieren nicht unterstützt.");
+      a.remove();
+      return;
+    }
+    a.remove();
+  }
+  toast(customMsg);
+}
+
+/* ───────── API ───────── */
+async function api(path, { method = "GET", body, user = false } = {}) {
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const tk = user ? utoken : token;
+  if (tk) headers["Authorization"] = "Bearer " + tk;
+
+  let res;
+  try {
+    res = await fetch((user ? HOME : base) + path, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined
+    });
+  } catch (e) {
+    throw new Error("Server nicht erreichbar. Läuft `python fivem_boost.py server`?");
+  }
+
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+
+  if (res.status === 401 && user && utoken) {
+    userLogout("Sitzung abgelaufen – bitte erneut anmelden.");
+    throw new Error("Sitzung abgelaufen.");
+  }
+  if (res.status === 401 && !user && token) {
+    logout("Sitzung abgelaufen – bitte erneut anmelden.");
+    throw new Error("Sitzung abgelaufen.");
+  }
+  if (!res.ok) throw new Error(data.error || "Server-Fehler (" + res.status + ")");
+  return data;
+}
+
+/* ───────── Auth & Views ───────── */
+function showLogin(msg) {
+  only("loginView");
+  $("#dashView").hidden = true;
+  $("#loginView").hidden = false;
+  const e = $("#loginErr");
+  e.hidden = !msg;
+  e.textContent = msg || "";
+}
+
+function logout(msg) {
+  token = "";
+  session.del("boost_token");
+  local.del("boost_token");
+  $("#newBox").hidden = true;
+  licenses = [];
+  showAuth(msg);
+}
+
+async function showDash() {
+  only("dashView");
+  $("#loginView").hidden = true;
+  $("#dashView").hidden = false;
+  $("#hostLabel").textContent = base.replace(/^https?:\/\//, "");
+  await loadList();
+}
+
+$("#loginForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const url = normUrl($("#url").value);
+  const btn = $("#loginBtn");
+  $("#loginErr").hidden = true;
+
+  btn.disabled = true;
+  btn.textContent = "Melde an …";
+  base = url;
+  token = "";
+
+  try {
+    const d = await api("/api/admin/login", {
+      method: "POST",
+      body: { user: $("#user").value.trim(), password: $("#pw").value.trim() }
+    });
+    token = d.token;
+    session.set("boost_token", token);
+    local.set("boost_token", token);
+    local.set("boost_server", base);
+    $("#pw").value = "";
+    await showDash();
+  } catch (e) {
+    token = "";
+    showLogin(e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "🔑 Anmelden";
+});
+
+$("#logoutBtn").addEventListener("click", () => logout("Erfolgreich abgemeldet."));
+$("#refreshBtn").addEventListener("click", () => {
+  const btn = $("#refreshBtn");
+  btn.textContent = "⏳ Lade...";
+  loadList()
+    .then(() => toast("Aktualisiert ✔"))
+    .catch(e => toast(e.message))
+    .finally(() => btn.textContent = "⟳ Aktualisieren");
+});
+
+/* ───────── Licenses Loading & Rendering ───────── */
+async function loadList() {
+  const d = await api("/api/admin/licenses");
+  licenses = d.licenses || [];
+  render(d.stats);
+}
+
+function render(serverStats) {
+  const stats = serverStats || {
+    total: licenses.length,
+    active: licenses.filter(l => l.status === "aktiv").length,
+    expired: licenses.filter(l => l.status === "abgelaufen").length,
+    revoked: licenses.filter(l => l.status === "gesperrt").length,
+    bound: licenses.filter(l => l.bound).length,
+    today_active: licenses.filter(l => l.last_seen && (Date.now() / 1000 - l.last_seen) < 86400).length
+  };
+
+  $("#sTotal").textContent = stats.total;
+  $("#sActive").textContent = stats.active;
+  $("#sExpired").textContent = stats.expired;
+  $("#sRevoked").textContent = stats.revoked;
+  $("#sBound").textContent = stats.bound;
+  $("#sToday").textContent = stats.today_active;
+
+  const q = $("#q").value.toLowerCase().trim();
+  const st = $("#st").value;
+  const fb = $("#filterBound").value;
+  const sort = $("#sortBy").value;
+
+  let shown = licenses.filter(l => {
+    const matchesQ = !q || (l.key + " " + (l.note || "") + " " + (l.hwid || "")).toLowerCase().includes(q);
+    const matchesSt = !st || l.status === st;
+    const matchesBound = !fb || (fb === "gebunden" ? l.bound : !l.bound);
+    return matchesQ && matchesSt && matchesBound;
+  });
+
+  // Sorting
+  shown.sort((a, b) => {
+    if (sort === "newest") return b.id - a.id;
+    if (sort === "oldest") return a.id - b.id;
+    if (sort === "seen") return (b.last_seen || 0) - (a.last_seen || 0);
+    if (sort === "exp") {
+      if (!a.expires_at) return 1;
+      if (!b.expires_at) return -1;
+      return a.expires_at - b.expires_at;
+    }
+    return b.id - a.id;
+  });
+
+  $("#countFiltered").textContent = shown.length;
+
+  const tb = $("#tb");
+  tb.replaceChildren();
+
+  for (const l of shown) {
+    const expInfo = fmtExp(l.expires_at);
+
+    const statusBadge = el("span", {
+      class: l.status === "aktiv" ? "tag ok" : (l.status === "gesperrt" ? "tag err" : "tag warn")
+    }, "● " + l.status.toUpperCase());
+
+    const boundBadge = l.bound
+      ? el("span", { class: "tag bound", title: "HWID: " + l.hwid }, "💻 Gebunden")
+      : el("span", { class: "tag" }, "🔓 Frei");
+
+    const row = el("tr", {},
+      // Key
+      el("td", {},
+        el("code", {
+          class: "key-code",
+          title: "Klicken zum Kopieren",
+          onclick: () => copyText(l.key, "Key kopiert: " + l.key)
+        }, l.key)
+      ),
+
+      // Benutzer / Notiz
+      el("td", {},
+        el("div", { class: "user-cell" },
+          el("span", { class: "user-name" }, l.note ? l.note : el("i", { style: "color:var(--muted);font-weight:normal" }, "Keine Notiz")),
+          el("span", { class: "user-note" }, `ID #${l.id} · Erstellt: ${fmt(l.created_at).split(" ")[0]}`)
+        )
+      ),
+
+      // Status
+      el("td", {}, statusBadge),
+
+      // Laufzeit / Ablauf
+      el("td", {},
+        el("div", { class: "user-cell" },
+          el("span", { style: "font-weight:600" }, expInfo.text),
+          el("span", { style: `font-size:11px; color:${expInfo.isExp ? 'var(--err)' : 'var(--muted)'}` }, expInfo.badge)
+        )
+      ),
+
+      // PC-Bindung
+      el("td", {}, boundBadge),
+
+      // Zuletzt aktiv
+      el("td", {},
+        el("span", { title: fmt(l.last_seen), style: "font-size:12px; color:var(--muted)" }, fmtRelative(l.last_seen))
+      ),
+
+      // Aktionen
+      el("td", { style: "text-align:right" },
+        el("div", { class: "actions", style: "justify-content:flex-end" },
+          el("button", {
+            class: "ghost sm",
+            title: "Key kopieren",
+            onclick: () => copyText(l.key)
+          }, "📋"),
+
+          el("button", {
+            class: "ghost sm",
+            title: "Benutzer / Lizenz bearbeiten",
+            onclick: () => openEditModal(l)
+          }, "✏️ Bearbeiten"),
+
+          el("button", {
+            class: l.status === "gesperrt" ? "success sm" : "ghost sm",
+            title: l.status === "gesperrt" ? "Entsperren" : "Sperren",
+            onclick: () => act(() => api(`/api/admin/licenses/${l.id}/toggle`, { method: "POST" }),
+              l.status === "gesperrt" ? "Benutzer entsperrt" : "Benutzer gesperrt")
+          }, l.status === "gesperrt" ? "Entsperren" : "Sperren"),
+
+          l.bound ? el("button", {
+            class: "ghost sm",
+            title: "HWID / PC-Bindung aufheben",
+            onclick: () => act(() => api(`/api/admin/licenses/${l.id}/reset`, { method: "POST" }), "PC-Bindung gelöst")
+          }, "💻 Lösen") : null,
+
+          el("button", {
+            class: "danger sm",
+            title: "Lizenz löschen",
+            onclick: () => {
+              if (confirm(`Soll der Key "${l.key}" (${l.note || 'Kein Name'}) wirklich unwiderruflich gelöscht werden?`)) {
+                act(() => api(`/api/admin/licenses/${l.id}`, { method: "DELETE" }), "Gelöscht");
+              }
+            }
+          }, "🗑️")
+        )
+      )
+    );
+
+    tb.append(row);
+  }
+
+  const e = $("#empty");
+  e.hidden = shown.length > 0;
+  e.textContent = licenses.length ? "Keine Lizenzen gefunden, die deiner Suche entsprechen." : "Noch keine Lizenzen vorhanden – erstelle oben deine erste!";
+}
+
+async function act(fn, msg) {
+  try {
+    await fn();
+    await loadList();
+    if (msg) toast(msg);
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+}
+
+$("#q").addEventListener("input", () => render());
+$("#st").addEventListener("change", () => render());
+$("#filterBound").addEventListener("change", () => render());
+$("#sortBy").addEventListener("change", () => render());
+
+/* ───────── Create Keys ───────── */
+$("#days").addEventListener("change", ev => {
+  $("#customDaysBox").hidden = ev.target.value !== "custom";
+});
+
+$("#createForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = $("#createBtn");
+  btn.disabled = true;
+  btn.textContent = "Erstelle...";
+
+  const daysSelect = $("#days").value;
+  const days = daysSelect === "custom" ? Number($("#customDays").value) : Number(daysSelect);
+  const note = $("#note").value.trim();
+  const count = Number($("#count").value);
+  const customKey = $("#customKey").value.trim();
+
+  try {
+    const d = await api("/api/admin/licenses", {
+      method: "POST",
+      body: { note, days, count, custom_key: customKey }
+    });
+
+    lastCreatedKeys = d.keys;
+    lastCreatedNote = note;
+    lastCreatedDays = days;
+
+    $("#newTitle").textContent = `✔ ${d.keys.length} ${d.keys.length === 1 ? 'NEUE LIZENZ' : 'NEUE LIZENZEN'} ERSTELLT`;
+    $("#newList").replaceChildren(...d.keys.map(k => el("div", { class: "keyline" },
+      el("code", {}, k),
+      el("span", { class: "key-details" },
+        `${note ? '👤 ' + note + ' · ' : ''}⏳ ${days === 0 ? 'Lifetime' : days + ' Tage'}`
+      ),
+      el("button", { class: "ghost sm", onclick: () => copyText(k) }, "📋 Kopieren")
+    )));
+
+    $("#newBox").hidden = false;
+    $("#note").value = "";
+    $("#customKey").value = "";
+    $("#count").value = "1";
+    toast("✔ " + d.keys.length + " Lizenz(en) erfolgreich erstellt!");
+    await loadList();
+  } catch (e) {
+    toast(e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "🚀 Lizenz erstellen";
+});
+
+$("#newClose").addEventListener("click", () => $("#newBox").hidden = true);
+$("#copyAll").addEventListener("click", () => copyText(lastCreatedKeys.join("\n"), "Alle Keys kopiert!"));
+
+$("#copyDiscord").addEventListener("click", () => {
+  const durationText = lastCreatedDays === 0 ? "Lifetime (dauerhaft unbegrenzt)" : `${lastCreatedDays} Tage`;
+  let msg = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nREVOLT OPTIMIZER – DEIN LIZENZKEY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  if (lastCreatedNote) msg += `👤 Benutzer: ${lastCreatedNote}\n`;
+  msg += `🔑 Key: ${lastCreatedKeys.join("\n🔑 Key: ")}\n⏳ Laufzeit: ${durationText}\n\n`;
+  msg += `Anleitung:\n1. Starte 'revolt optimizer.exe'\n2. Gib deinen Key ein und klicke auf 'Aktivieren'\n3. Wähle deine Optimierungen & starte mit maximalen FPS durch!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+  copyText(msg, "Discord-Nachricht kopiert! Bereit zum Versenden.");
+});
+
+$("#downloadTxt").addEventListener("click", () => {
+  const durationText = lastCreatedDays === 0 ? "Lifetime" : `${lastCreatedDays} Tage`;
+  const content = `REVOLT OPTIMIZER - NEUE LIZENZEN (${new Date().toLocaleString("de-DE")})\nKunde/Notiz: ${lastCreatedNote || 'Keine'}\nLaufzeit: ${durationText}\n\nKeys:\n` + lastCreatedKeys.join("\n");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: `fivem_boost_keys_${Date.now()}.txt` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Datei heruntergeladen!");
+});
+
+/* ───────── Edit Modal ───────── */
+function openEditModal(license) {
+  currentEditLicense = license;
+  $("#editKey").textContent = license.key;
+  $("#editNote").value = license.note || "";
+  $("#editStatus").value = license.status === "gesperrt" ? "revoked" : "active";
+  $("#editExtend").value = "keep";
+
+  const hwidBox = $("#editHwidText");
+  if (license.hwid) {
+    hwidBox.innerHTML = `Gebunden an HWID: <code style="color:#fff">${license.hwid}</code>`;
+    $("#editResetHwidBtn").hidden = false;
+  } else {
+    hwidBox.textContent = "Aktuell an keinen PC gebunden (frei).";
+    $("#editResetHwidBtn").hidden = true;
+  }
+
+  $("#editModal").hidden = false;
+}
+
+function closeEditModal() {
+  $("#editModal").hidden = true;
+  currentEditLicense = null;
+}
+
+$("#editCopyKey").addEventListener("click", () => {
+  if (currentEditLicense) copyText(currentEditLicense.key);
+});
+
+$("#editResetHwidBtn").addEventListener("click", async () => {
+  if (!currentEditLicense) return;
+  try {
+    await api(`/api/admin/licenses/${currentEditLicense.id}/reset`, { method: "POST" });
+    currentEditLicense.bound = false;
+    currentEditLicense.hwid = null;
+    $("#editHwidText").textContent = "PC-Bindung erfolgreich aufgehoben!";
+    $("#editResetHwidBtn").hidden = true;
+    toast("HWID gelöst.");
+    await loadList();
+  } catch (e) {
+    toast(e.message);
+  }
+});
+
+$("#editForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!currentEditLicense) return;
+
+  const note = $("#editNote").value.trim();
+  const revoked = $("#editStatus").value === "revoked";
+  const extendOpt = $("#editExtend").value;
+
+  try {
+    // Update basic info
+    await api(`/api/admin/licenses/${currentEditLicense.id}`, {
+      method: "PUT",
+      body: { note, revoked }
+    });
+
+    // Handle extension if requested
+    if (extendOpt !== "keep") {
+      const days = extendOpt === "lifetime" ? 0 : Number(extendOpt);
+      await api(`/api/admin/licenses/${currentEditLicense.id}/extend`, {
+        method: "POST",
+        body: { days }
+      });
+    }
+
+    toast("Änderungen gespeichert ✔");
+    closeEditModal();
+    await loadList();
+  } catch (e) {
+    toast("Fehler: " + e.message);
+  }
+});
+
+/* ───────── Export CSV ───────── */
+$("#exportBtn").addEventListener("click", () => {
+  if (!licenses.length) {
+    toast("Keine Lizenzen zum Exportieren vorhanden.");
+    return;
+  }
+  const rows = [
+    ["ID", "Key", "Benutzer_Notiz", "Status", "Erstellt_am", "Laeuft_ab", "HWID", "Zuletzt_aktiv"]
+  ];
+  for (const l of licenses) {
+    rows.push([
+      l.id,
+      `"${l.key}"`,
+      `"${(l.note || '').replace(/"/g, '""')}"`,
+      l.status,
+      `"${fmt(l.created_at)}"`,
+      `"${l.expires_at ? fmt(l.expires_at) : 'Lifetime'}"`,
+      `"${l.hwid || ''}"`,
+      `"${fmt(l.last_seen)}"`
+    ]);
+  }
+  const csvContent = "\uFEFF" + rows.map(r => r.join(";")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: `fivem_boost_licenses_${Date.now()}.csv` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("CSV erfolgreich heruntergeladen!");
+});
+
+/* ═════════════════════════ KUNDENPORTAL ═════════════════════════ */
+const HOME = location.protocol.startsWith("http") ? location.origin : "http://5.253.246.114:5050";
+const VIEWS = ["authView", "portalView", "loginView", "dashView"];
+let utoken = "", me = null;
+
+function only(id) { VIEWS.forEach(v => $("#" + v).hidden = v !== id); window.scrollTo(0, 0); }
+const uapi = (path, opt = {}) => api(path, { ...opt, user: true });
+const dt = ts => ts ? new Date(ts * 1000).toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" }) : "–";
+function busy(btn, on, label) { btn.disabled = on; btn.textContent = label; }
+function showAuth(msg) {
+  only("authView");
+  const e = $("#authErr"); e.hidden = !msg; e.textContent = msg || "";
+}
+function userLogout(msg) {
+  utoken = ""; me = null; local.del("revolt_utoken"); session.del("revolt_utoken");
+  showAuth(msg);
+}
+function setTab(t) {
+  const login = t === "login";
+  $("#tabLogin").classList.toggle("on", login); $("#tabReg").classList.toggle("on", !login);
+  $("#userLoginForm").hidden = !login; $("#regForm").hidden = login;
+  $("#authTitle").textContent = login ? "Willkommen zurück" : "Konto erstellen";
+  $("#authSub").textContent = login ? "Melde dich an, um fortzufahren." : "Registriere dich kostenlos in wenigen Sekunden.";
+  $("#authErr").hidden = true;
+}
+$("#tabLogin").onclick = () => setTab("login");
+$("#tabReg").onclick = () => setTab("reg");
+$("#toAdmin").onclick = () => showLogin();
+document.querySelectorAll(".eye").forEach(b => b.onclick = () => {
+  const i = $("#" + b.dataset.for), show = i.type === "password";
+  i.type = show ? "text" : "password"; b.textContent = show ? "Verbergen" : "Zeigen";
+});
+
+/* Passwortstärke */
+$("#rPw").addEventListener("input", () => {
+  const v = $("#rPw").value;
+  let sc = 0; if (v.length >= 8) sc++; if (v.length >= 12) sc++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) sc++; if (/\d/.test(v)) sc++; if (/[^A-Za-z0-9]/.test(v)) sc++;
+  const lv = !v ? 0 : Math.min(4, Math.max(1, sc - (v.length < 8 ? 1 : 0)));
+  const cols = ["transparent", "#ef4444", "#eab308", "#84cc16", "#22c55e"], lbl = ["", "Schwach", "Mittel", "Gut", "Sehr stark"];
+  $("#meterBar").style.width = lv * 25 + "%"; $("#meterBar").style.background = cols[lv]; $("#meterLbl").textContent = lbl[lv];
+});
+
+async function authDone(d, remember) {
+  utoken = d.token; me = d.user;
+  (remember ? local : session).set("revolt_utoken", utoken);
+  (remember ? session : local).del("revolt_utoken");
+  await enterPortal();
+}
+$("#userLoginForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const b = $("#ulBtn"); $("#authErr").hidden = true;
+  if (!$("#uEmail").value.trim() || !$("#uPw").value) return showAuth("Bitte E-Mail und Passwort eingeben.");
+  busy(b, true, "Melde an …");
+  try {
+    const d = await uapi("/api/auth/login", { method: "POST", body: { email: $("#uEmail").value, password: $("#uPw").value } });
+    $("#uPw").value = ""; await authDone(d, $("#uRemember").checked);
+  } catch (e) { showAuth(e.message); }
+  busy(b, false, "Anmelden");
+});
+$("#regForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const b = $("#rgBtn"), pw = $("#rPw").value;
+  if (!$("#rName").value.trim()) return showAuth("Bitte gib deinen Namen ein.");
+  if (pw.length < 8) return showAuth("Das Passwort muss mindestens 8 Zeichen lang sein.");
+  if (pw !== $("#rPw2").value) return showAuth("Die Passwörter stimmen nicht überein.");
+  busy(b, true, "Erstelle Konto …");
+  try {
+    const d = await uapi("/api/auth/register", { method: "POST", body: { name: $("#rName").value, email: $("#rEmail").value, password: pw } });
+    $("#rPw").value = $("#rPw2").value = ""; await authDone(d, true); toast("Willkommen an Bord! 🎉");
+  } catch (e) { showAuth(e.message); }
+  busy(b, false, "Konto erstellen");
+});
+$("#uLogout").onclick = () => userLogout("Du wurdest abgemeldet.");
+$("#backPortal") && ($("#backPortal").onclick = () => showAuth());
+
+
+function switchPortalTab(tabName) {
+  document.querySelectorAll('.portal-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.portal-tab-pane').forEach(p => {
+    p.hidden = (p.id !== 'tab-' + tabName);
+  });
+}
+
+/* Portal */
+async function enterPortal() {
+  if (!me) me = (await uapi("/api/me")).user;
+  only("portalView"); renderMe(); loadDl();
+}
+function paintAv(node) {
+  node.replaceChildren();
+  if (me.avatar) { const i = new Image(); i.alt = ""; i.src = me.avatar; node.append(i); }
+  else node.textContent = me.name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+function renderMe() {
+  paintAv($("#avChip")); paintAv($("#avBig")); paintAv($("#homeAvBig"));
+  if ($("#chipName")) $("#chipName").textContent = me.name;
+  if ($("#homeWelcomeName")) $("#homeWelcomeName").textContent = me.name;
+  if ($("#homeName")) $("#homeName").textContent = me.name;
+  if ($("#homeEmail")) $("#homeEmail").textContent = me.email;
+  if ($("#homeDiscord")) $("#homeDiscord").textContent = me.discord || "–";
+  if ($("#homeSince")) $("#homeSince").textContent = dt(me.created_at);
+  if ($("#homeLast")) $("#homeLast").textContent = dt(me.last_login);
+  if ($("#pName")) $("#pName").value = me.name;
+  if ($("#pEmail")) $("#pEmail").value = me.email;
+  if ($("#pDiscord")) $("#pDiscord").value = me.discord || "";
+  if ($("#pSince")) $("#pSince").textContent = dt(me.created_at);
+  if ($("#pLast")) $("#pLast").textContent = dt(me.last_login);
+  const l = me.license, box = $("#licInfo"); box.replaceChildren();
+  $("#licForm").hidden = !!l; $("#licDetach").hidden = !l;
+  const kv = (k, v) => { const r = document.createElement("div"); r.className = "kv"; const a = document.createElement("span"); a.textContent = k; r.append(a, v); box.append(r); };
+  if (!l) { const p = document.createElement("div"); p.className = "hint"; p.textContent = "Mit deinem Konto ist noch kein Lizenzkey verknüpft."; box.append(p); return; }
+  const tag = document.createElement("span"); tag.className = "tag " + (l.status === "aktiv" ? "ok" : l.status === "gesperrt" ? "err" : "warn"); tag.textContent = l.status;
+  const code = document.createElement("code"); code.className = "key-code"; code.textContent = l.key; code.title = "Klicken zum Kopieren"; code.onclick = () => copyText(l.key);
+  const ex = document.createElement("b"); ex.textContent = l.expires_at ? dt(l.expires_at) : "Lifetime";
+  kv("Status", tag); kv("Key", code); kv("Gültig bis", ex);
+}
+async function loadDl() {
+  try {
+    const d = await uapi("/api/download/info");
+    $("#dlMeta").textContent = d.available ? `${d.filename} · ${(d.size / 1024).toFixed(0)} KB · Stand ${dt(d.updated)}` : "Aktuell ist keine Datei verfügbar.";
+    $("#dlBtn").disabled = !d.available;
+  } catch (e) { $("#dlMeta").textContent = e.message; }
+}
+$("#dlBtn").addEventListener("click", async () => {
+  const b = $("#dlBtn"); busy(b, true, "Lade …");
+  try {
+    const res = await fetch(HOME + "/api/download/client", { headers: { Authorization: "Bearer " + utoken } });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Download fehlgeschlagen.");
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: "revolt.py" });
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("Download gestartet ✔");
+  } catch (e) { toast(e instanceof TypeError ? "Server nicht erreichbar." : e.message); }
+  busy(b, false, "⬇\u00a0 revolt.py herunterladen");
+});
+
+async function saveMe(body, okMsg) {
+  try { me = (await uapi("/api/me", { method: "PATCH", body })).user; renderMe(); toast(okMsg); return true; }
+  catch (e) { toast(e.message); return false; }
+}
+$("#profileForm").addEventListener("submit", async ev => {
+  ev.preventDefault(); const b = $("#pSave"); busy(b, true, "Speichere …");
+  await saveMe({ name: $("#pName").value, email: $("#pEmail").value, discord: $("#pDiscord").value }, "Profil gespeichert ✔");
+  busy(b, false, "Änderungen speichern");
+});
+function cropAvatar(file, size) {
+  return new Promise((ok, no) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const c = document.createElement("canvas"); c.width = c.height = size;
+      const s = Math.min(img.width, img.height);
+      c.getContext("2d").drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(u); ok(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); no(new Error("Bild konnte nicht gelesen werden.")); };
+    img.src = u;
+  });
+}
+$("#avFile").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  try { await saveMe({ avatar: await cropAvatar(f, 256) }, "Profilbild aktualisiert ✔"); } catch (e) { toast(e.message); }
+});
+$("#avRemove").onclick = () => saveMe({ avatar: "" }, "Profilbild entfernt");
+
+$("#pwForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if ($("#newPw").value !== $("#newPw2").value) return toast("Die neuen Passwörter stimmen nicht überein.");
+  try {
+    await uapi("/api/me/password", { method: "POST", body: { current: $("#curPw").value, new: $("#newPw").value } });
+    $("#pwForm").reset(); toast("Passwort geändert ✔");
+  } catch (e) { toast(e.message); }
+});
+$("#licForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  try { me = (await uapi("/api/me/license", { method: "POST", body: { key: $("#licKey").value } })).user; $("#licKey").value = ""; renderMe(); toast("Lizenz verknüpft ✔"); }
+  catch (e) { toast(e.message); }
+});
+$("#licDetach").onclick = async () => {
+  if (!confirm("Key wirklich vom Konto lösen?")) return;
+  try { me = (await uapi("/api/me/license", { method: "DELETE" })).user; renderMe(); toast("Key gelöst"); } catch (e) { toast(e.message); }
+};
+$("#delForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!confirm("Konto endgültig löschen? Das kann nicht rückgängig gemacht werden.")) return;
+  try { await uapi("/api/me", { method: "DELETE", body: { password: $("#delPw").value } }); $("#delPw").value = ""; userLogout("Dein Konto wurde gelöscht."); }
+  catch (e) { toast(e.message); }
+});
+
+/* ───────── Init: erst Kunden-Login, Admin-Zugang separat ───────── */
+(async function init() {
+  $("#url").value = local.get("boost_server") || HOME;
+  const ut = local.get("revolt_utoken") || session.get("revolt_utoken");
+  if (ut) { utoken = ut; try { await enterPortal(); return; } catch (e) { utoken = ""; } }
+  const adminTok = session.get("boost_token") || local.get("boost_token");
+  if (adminTok) { base = $("#url").value; token = adminTok; try { await showDash(); return; } catch (e) { token = ""; } }
+  if (VIEWS.every(v => $("#" + v).hidden)) showAuth();
+})();
+
+// Auto-Refresh every 25 seconds when page is visible
+setInterval(() => {
+  if (token && !document.hidden) {
+    loadList().catch(() => {});
+  }
+}, 25000);
+
+/* ───────── Snow Animation ───────── */
+(function () {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("#snow"), x = c.getContext("2d"), f = [];
+  let W, H;
+  const rs = () => { W = c.width = innerWidth; H = c.height = innerHeight; };
+  rs();
+  addEventListener("resize", rs);
+  for (let i = 0; i < 95; i++) {
+    f.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 2.2 + 0.6,
+      v: Math.random() * 0.75 + 0.3,
+      p: Math.random() * 6.28,
+      s: Math.random() * 0.5 + 0.2
+    });
+  }
+  (function tick() {
+    x.clearRect(0, 0, W, H);
+    for (const o of f) {
+      o.y += o.v;
+      o.p += 0.01;
+      o.x += Math.sin(o.p) * o.s;
+      if (o.y > H + 5) { o.y = -5; o.x = Math.random() * W; }
+      x.globalAlpha = 0.2 + o.r / 3.2 * 0.5;
+      x.fillStyle = "#fff";
+      x.beginPath();
+      x.arc(o.x, o.y, o.r, 0, 6.283);
+      x.fill();
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+</script>
+</body>
+</html>
